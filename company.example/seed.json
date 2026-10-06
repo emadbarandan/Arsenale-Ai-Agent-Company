@@ -1,0 +1,41 @@
+{
+  "_note": "An invented example company. Copy this file, change the offices, projects and homes to yours, then run: arsenale log --company-init --seed <your copy>. The company folder is created in the data folder (arsenale paths), never in this repo. Project aliases are the free-text project names your run logs already use. Office leads are agent names (the three heads ship in agents/), or \"supervisor\" for the office the main session heads. Agents not listed under employees are placed in the first office. Themes: teal, blue, violet, coral, amber, slate.",
+  "company": {
+    "id": "co-main",
+    "name": "Northwind Labs",
+    "issuePrefix": "NW",
+    "budgetsEnabled": true,
+    "budget": { "monthlyTokens": 20000000, "monthlyUsd": null, "softAlertPct": 80, "hardStop": false }
+  },
+  "offices": [
+    { "id": "hq", "name": "HQ", "leadEmployeeId": "supervisor", "profile": "operations", "theme": "coral" },
+    { "id": "engineering", "name": "Engineering", "leadEmployeeId": "engineering-lead", "profile": "engineering", "theme": "blue", "budget": { "monthlyTokens": 8000000, "softAlertPct": 80, "hardStop": true } },
+    { "id": "product", "name": "Product", "leadEmployeeId": "product-lead", "profile": "product", "theme": "teal" },
+    { "id": "research", "name": "Research", "leadEmployeeId": "research-lead", "profile": "research", "theme": "violet" }
+  ],
+  "projects": [
+    { "id": "ledger-api", "name": "Ledger API", "key": "LEDG", "officeId": "engineering", "aliases": ["ledger", "Ledger API"] },
+    { "id": "atlas-app", "name": "Atlas app", "key": "ATLS", "officeId": "product", "aliases": ["atlas", "Atlas App"] },
+    { "id": "orbit-site", "name": "Orbit website", "key": "ORBT", "officeId": "product", "aliases": ["orbit"] },
+    { "id": "search-spike", "name": "Search spike", "key": "SRCH", "officeId": "research", "aliases": ["search"] },
+    { "id": "tooling", "name": "Agent tooling", "key": "TOOL", "officeId": "hq", "aliases": ["tooling", "arsenale"] }
+  ],
+  "employees": {
+    "implementer": { "homeOfficeId": "engineering" },
+    "tester": { "homeOfficeId": "engineering", "budget": { "monthlyTokens": 3000000, "softAlertPct": 80, "hardStop": true } },
+    "code-reviewer": { "homeOfficeId": "engineering" },
+    "security-reviewer": { "homeOfficeId": "engineering" },
+    "data-migration": { "homeOfficeId": "engineering" },
+    "domain-validator": { "homeOfficeId": "engineering" },
+    "performance": { "homeOfficeId": "engineering" },
+    "release-builder": { "homeOfficeId": "engineering" },
+    "release-manager": { "homeOfficeId": "engineering" },
+    "ui-designer": { "homeOfficeId": "product" },
+    "ux-reviewer": { "homeOfficeId": "product" },
+    "visual-qa": { "homeOfficeId": "product" },
+    "spec-writer": { "homeOfficeId": "product" },
+    "user-guide": { "homeOfficeId": "product" },
+    "seo-specialist": { "homeOfficeId": "product" },
+    "feature-scout": { "homeOfficeId": "research" }
+  }
+}

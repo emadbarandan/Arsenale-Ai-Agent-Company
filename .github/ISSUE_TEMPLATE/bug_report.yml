@@ -1,0 +1,44 @@
+name: Bug report
+description: Something does not work as described.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for reporting. Please use invented data only; never paste real run logs, keys or personal paths. Security problems go to the Security tab, not here.
+  - type: input
+    id: version
+    attributes:
+      label: Arsenale version
+      description: Output of `arsenale --version`
+    validations:
+      required: true
+  - type: input
+    id: env
+    attributes:
+      label: OS, shell and Node.js version
+      placeholder: Windows 11, PowerShell 5.1, Node 22.11
+    validations:
+      required: true
+  - type: input
+    id: tool
+    attributes:
+      label: Coding tool and version
+      placeholder: Claude Code 2.x, Codex CLI, Gemini CLI, none
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: The exact commands, from a fresh `arsenale demo` if you can.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected, and what happened
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: Output or screenshot
+      render: text

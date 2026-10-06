@@ -1,0 +1,81 @@
+{
+  "format": "arsenale-pack",
+  "formatVersion": 1,
+  "id": "content-marketing",
+  "version": "1.0.0",
+  "name": "Content & Marketing",
+  "nameFa": "محتوا و بازاریابی",
+  "description": "Plan campaigns, write brand-voice copy, draft social posts, improve website SEO and prepare newsletters, all as drafts that you review before anything goes out.",
+  "descriptionFa": "برنامه‌ریزی کمپین، نوشتن متن با لحن برند، پیش‌نویس پست شبکه‌های اجتماعی، بهبود سئوی وب‌سایت و آماده‌سازی خبرنامه؛ همه به‌صورت پیش‌نویس برای بازبینی شما.",
+  "minArsenale": "1.0.0",
+  "office": {
+    "id": "marketing",
+    "name": "Content & Marketing",
+    "nameFa": "محتوا و بازاریابی",
+    "theme": "coral",
+    "profile": "marketing",
+    "lead": "marketing-lead"
+  },
+  "members": [
+    {
+      "file": "agents/marketing-lead.md",
+      "id": "marketing-lead",
+      "zone": "lead",
+      "title": "Marketing Lead",
+      "titleFa": "مدیر بازاریابی",
+      "tier": "standard"
+    },
+    {
+      "file": "agents/copywriter.md",
+      "id": "copywriter",
+      "zone": "docs",
+      "title": "Copywriter",
+      "titleFa": "کپی‌رایتر",
+      "tier": "standard"
+    },
+    {
+      "file": "agents/social-media-planner.md",
+      "id": "social-media-planner",
+      "zone": "docs",
+      "title": "Social Media Planner",
+      "titleFa": "برنامه‌ریز شبکه‌های اجتماعی",
+      "tier": "standard"
+    },
+    {
+      "file": "agents/seo-specialist.md",
+      "id": "seo-specialist",
+      "zone": "build",
+      "title": "SEO Specialist (content)",
+      "titleFa": "متخصص سئوی محتوا",
+      "tier": "standard"
+    },
+    {
+      "file": "agents/newsletter-editor.md",
+      "id": "newsletter-editor",
+      "zone": "docs",
+      "title": "Newsletter Editor",
+      "titleFa": "ویراستار خبرنامه",
+      "tier": "standard"
+    }
+  ],
+  "sampleTasks": [
+    {
+      "title": "Plan a four-week spring campaign for a small bakery",
+      "description": "Build a four-week campaign plan for a neighbourhood bakery launching a spring pastry range: weekly themes, content calendar, and a task list split between the copywriter, social media planner and newsletter editor.",
+      "assignee": "marketing-lead"
+    },
+    {
+      "title": "Compose three product descriptions in our brand voice",
+      "description": "Using the brand voice notes and sample texts in the folder I name, draft three short descriptions for new sourdough loaves. Give two tone options for each.",
+      "assignee": "copywriter"
+    },
+    {
+      "title": "Suggest keywords and meta descriptions for five pages",
+      "description": "For the five pages listed in my sitemap export of a small bakery website, propose a main keyword, a title and a meta description for each, and flag pages with thin content.",
+      "assignee": "seo-specialist"
+    }
+  ],
+  "policy": {
+    "members": {}
+  }
+}

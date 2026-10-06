@@ -1,0 +1,33 @@
+# Arsenale keeps its data in ARSENALE_HOME (~/.arsenale), never in the repo.
+# These catch a data folder pointed at the checkout by mistake.
+/agent-runs/
+/company/
+answers.jsonl
+*.jsonl
+/agent-dashboard.html
+/agent-dashboard-archive.html
+/config.json
+/backups/
+/installed.txt
+
+# Dependencies
+node_modules/
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*~
+.vscode/
+.idea/
+
+# Local config and secrets
+.env*
+*.lic
+*.pem
+*.key
+*.pfx
+*.p12
+id_*
+secrets/

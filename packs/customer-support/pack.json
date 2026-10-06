@@ -1,0 +1,81 @@
+{
+  "format": "arsenale-pack",
+  "formatVersion": 1,
+  "id": "customer-support",
+  "version": "1.0.0",
+  "name": "Customer support",
+  "nameFa": "پشتیبانی مشتریان",
+  "description": "Draft replies in your brand tone, write FAQs, sort and tag exported tickets and summarise customer feedback. Replies are drafts; nothing is ever sent for you.",
+  "descriptionFa": "پیش‌نویس پاسخ‌ها با لحن برند، نوشتن پرسش‌های متداول، مرتب‌سازی و برچسب‌گذاری تیکت‌های خروجی‌گرفته‌شده و خلاصه‌سازی بازخورد مشتریان؛ هیچ پیامی از طرف شما ارسال نمی‌شود.",
+  "minArsenale": "1.0.0",
+  "office": {
+    "id": "support",
+    "name": "Customer support",
+    "nameFa": "پشتیبانی مشتریان",
+    "theme": "cyan",
+    "profile": "support",
+    "lead": "support-lead"
+  },
+  "members": [
+    {
+      "file": "agents/support-lead.md",
+      "id": "support-lead",
+      "zone": "lead",
+      "title": "Support Lead",
+      "titleFa": "مدیر پشتیبانی",
+      "tier": "standard"
+    },
+    {
+      "file": "agents/reply-drafter.md",
+      "id": "reply-drafter",
+      "zone": "docs",
+      "title": "Reply Drafter",
+      "titleFa": "نویسنده‌ی پیش‌نویس پاسخ",
+      "tier": "standard"
+    },
+    {
+      "file": "agents/faq-writer.md",
+      "id": "faq-writer",
+      "zone": "docs",
+      "title": "FAQ Writer",
+      "titleFa": "نویسنده‌ی پرسش‌های متداول",
+      "tier": "standard"
+    },
+    {
+      "file": "agents/ticket-triager.md",
+      "id": "ticket-triager",
+      "zone": "review",
+      "title": "Ticket Triager",
+      "titleFa": "مرتب‌کننده‌ی تیکت‌ها",
+      "tier": "light"
+    },
+    {
+      "file": "agents/feedback-summariser.md",
+      "id": "feedback-summariser",
+      "zone": "build",
+      "title": "Feedback Summariser",
+      "titleFa": "خلاصه‌کننده‌ی بازخورد",
+      "tier": "standard"
+    }
+  ],
+  "sampleTasks": [
+    {
+      "title": "Draft replies to three customer complaints about late delivery",
+      "description": "Using the three messages I paste in, draft calm, honest replies in our brand tone that apologise, explain next steps and avoid promises we cannot keep.",
+      "assignee": "reply-drafter"
+    },
+    {
+      "title": "Compose an FAQ page for a small online shop",
+      "description": "Draft ten frequently asked questions and answers about shipping, returns and payment for an invented online shop selling hand-made candles, from the policy notes I provide.",
+      "assignee": "faq-writer"
+    },
+    {
+      "title": "Sort last week's exported tickets by topic and urgency",
+      "description": "Take the ticket export in the folder I name, tag each ticket by topic and urgency, and list the three most common problems.",
+      "assignee": "ticket-triager"
+    }
+  ],
+  "policy": {
+    "members": {}
+  }
+}

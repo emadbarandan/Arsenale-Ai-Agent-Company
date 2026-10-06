@@ -1,0 +1,73 @@
+{
+  "format": "arsenale-pack",
+  "formatVersion": 1,
+  "id": "operations",
+  "version": "1.0.0",
+  "name": "Operations & Admin",
+  "nameFa": "عملیات و امور اداری",
+  "description": "Run the everyday office work: agendas, minutes and to-do lists, written procedures, and supplier requests and offer comparisons, all prepared as drafts.",
+  "descriptionFa": "انجام کارهای روزمره‌ی دفتر: دستور جلسه، صورت‌جلسه و فهرست کارها، روش‌های اجرایی گام‌به‌گام و درخواست قیمت و مقایسه‌ی پیشنهادها؛ همه به‌صورت پیش‌نویس.",
+  "minArsenale": "1.0.0",
+  "office": {
+    "id": "operations",
+    "name": "Operations & Admin",
+    "nameFa": "عملیات و امور اداری",
+    "theme": "amber",
+    "profile": "operations",
+    "lead": "operations-lead"
+  },
+  "members": [
+    {
+      "file": "agents/operations-lead.md",
+      "id": "operations-lead",
+      "zone": "lead",
+      "title": "Operations Lead",
+      "titleFa": "مدیر عملیات",
+      "tier": "standard"
+    },
+    {
+      "file": "agents/office-assistant.md",
+      "id": "office-assistant",
+      "zone": "build",
+      "title": "Office Assistant",
+      "titleFa": "دستیار اداری",
+      "tier": "standard"
+    },
+    {
+      "file": "agents/process-writer.md",
+      "id": "process-writer",
+      "zone": "docs",
+      "title": "Process Writer",
+      "titleFa": "نویسنده‌ی روش‌های اجرایی",
+      "tier": "standard"
+    },
+    {
+      "file": "agents/supplier-coordinator.md",
+      "id": "supplier-coordinator",
+      "zone": "build",
+      "title": "Supplier Coordinator",
+      "titleFa": "هماهنگ‌کننده‌ی تأمین‌کنندگان",
+      "tier": "standard"
+    }
+  ],
+  "sampleTasks": [
+    {
+      "title": "Organise the monthly team meeting for a design studio",
+      "description": "Prepare an agenda from the topics I list, a timing plan for sixty minutes, and a blank minutes template with an action table.",
+      "assignee": "office-assistant"
+    },
+    {
+      "title": "Compose a procedure for opening and closing the shop",
+      "description": "Draft a step-by-step procedure for opening and closing a small bakery shop each day, with a checklist and who is responsible at each step.",
+      "assignee": "process-writer"
+    },
+    {
+      "title": "Draft a request for quotes for new office chairs",
+      "description": "Compose a request for quotes to three suppliers for ten office chairs, listing our requirements, quantity, delivery place and the date answers are needed.",
+      "assignee": "supplier-coordinator"
+    }
+  ],
+  "policy": {
+    "members": {}
+  }
+}

@@ -1,0 +1,4 @@
+{
+  "_note": "USD per million tokens, per model. Empty on purpose: the dashboard shows no cost until you type in the prices from your own plan or price list, and a cost it cannot price is shown as 'n/a', never as 0. Keys are the model names the dashboard shows for your runs (the Tools & usage view lists them). A key without a version, such as \"Family\", covers every \"Family x.y\". Shape of one entry: \"Model name\": { \"input\": 0.0, \"output\": 0.0, \"cacheRead\": 0.0, \"cacheWrite5m\": 0.0, \"cacheWrite1h\": 0.0 } (cacheWrite5m and cacheWrite1h are two cache-write lifetimes some vendors price apart; use the same number twice, or 0, if yours does not). Your copy lives in the data folder (arsenale paths); this file in the repo is only the template.",
+  "models": {}
+}

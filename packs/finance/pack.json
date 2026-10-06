@@ -1,0 +1,97 @@
+{
+  "format": "arsenale-pack",
+  "formatVersion": 1,
+  "id": "finance",
+  "version": "1.0.0",
+  "name": "Finance",
+  "nameFa": "مالی",
+  "description": "Categorise exported transactions, draft invoices, explain monthly budget differences in plain words and check expense lists against your own rules. Drafts only; never pays.",
+  "descriptionFa": "دسته‌بندی تراکنش‌های خروجی‌گرفته‌شده، پیش‌نویس فاکتور، توضیح ساده‌ی تفاوت‌های ماهانه‌ی بودجه و بررسی فهرست هزینه‌ها بر پایه‌ی قوانین خودتان؛ فقط پیش‌نویس و بدون پرداخت.",
+  "minArsenale": "1.0.0",
+  "office": {
+    "id": "finance",
+    "name": "Finance",
+    "nameFa": "مالی",
+    "theme": "blue",
+    "profile": "finance",
+    "lead": "finance-lead"
+  },
+  "members": [
+    {
+      "file": "agents/finance-lead.md",
+      "id": "finance-lead",
+      "zone": "lead",
+      "title": "Finance Lead",
+      "titleFa": "مدیر مالی",
+      "tier": "standard"
+    },
+    {
+      "file": "agents/bookkeeping-assistant.md",
+      "id": "bookkeeping-assistant",
+      "zone": "build",
+      "title": "Bookkeeping Assistant",
+      "titleFa": "دستیار حسابداری",
+      "tier": "standard"
+    },
+    {
+      "file": "agents/invoice-drafter.md",
+      "id": "invoice-drafter",
+      "zone": "docs",
+      "title": "Invoice Drafter",
+      "titleFa": "نویسنده‌ی پیش‌نویس فاکتور",
+      "tier": "standard"
+    },
+    {
+      "file": "agents/budget-analyst.md",
+      "id": "budget-analyst",
+      "zone": "build",
+      "title": "Budget Analyst",
+      "titleFa": "تحلیلگر بودجه",
+      "tier": "standard"
+    },
+    {
+      "file": "agents/expense-checker.md",
+      "id": "expense-checker",
+      "zone": "review",
+      "title": "Expense Checker",
+      "titleFa": "بررسی‌کننده‌ی هزینه‌ها",
+      "tier": "light"
+    }
+  ],
+  "sampleTasks": [
+    {
+      "title": "Categorise last month's exported transactions for a small bakery",
+      "description": "Using the exported transaction file in the folder I name, assign each line to one of my categories and list every line you cannot categorise, with the reason.",
+      "assignee": "bookkeeping-assistant"
+    },
+    {
+      "title": "Draft an invoice for a catering job",
+      "description": "Prepare a draft invoice for an invented customer: three line items, quantities, unit prices and a payment term of 30 days. Leave tax details marked TO CONFIRM.",
+      "assignee": "invoice-drafter"
+    },
+    {
+      "title": "Explain the monthly budget variance in plain words",
+      "description": "Compare the budget and actual figures in the two files I provide for a design studio and explain the five biggest differences in plain words with a short table.",
+      "assignee": "budget-analyst"
+    }
+  ],
+  "policy": {
+    "members": {
+      "finance-lead": {
+        "payment": "never"
+      },
+      "bookkeeping-assistant": {
+        "payment": "never"
+      },
+      "invoice-drafter": {
+        "payment": "never"
+      },
+      "budget-analyst": {
+        "payment": "never"
+      },
+      "expense-checker": {
+        "payment": "never"
+      }
+    }
+  }
+}

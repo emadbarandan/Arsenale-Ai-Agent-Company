@@ -1,0 +1,81 @@
+{
+  "format": "arsenale-pack",
+  "formatVersion": 1,
+  "id": "hr",
+  "version": "1.0.0",
+  "name": "HR",
+  "nameFa": "منابع انسانی",
+  "description": "Draft job ads, interview question sets and scorecards, first-week onboarding plans and handbook sections, all as drafts for a qualified person to check.",
+  "descriptionFa": "پیش‌نویس آگهی شغلی، پرسش‌های مصاحبه و برگه‌ی امتیازدهی، برنامه‌ی هفته‌ی اول ورود کارکنان و بخش‌هایی از راهنمای کارکنان؛ همه برای بررسی یک فرد صلاحیت‌دار.",
+  "minArsenale": "1.0.0",
+  "office": {
+    "id": "people",
+    "name": "HR",
+    "nameFa": "منابع انسانی",
+    "theme": "pink",
+    "profile": "people",
+    "lead": "people-lead"
+  },
+  "members": [
+    {
+      "file": "agents/people-lead.md",
+      "id": "people-lead",
+      "zone": "lead",
+      "title": "People Lead",
+      "titleFa": "مدیر منابع انسانی",
+      "tier": "standard"
+    },
+    {
+      "file": "agents/job-ad-writer.md",
+      "id": "job-ad-writer",
+      "zone": "docs",
+      "title": "Job Ad Writer",
+      "titleFa": "نویسنده‌ی آگهی شغلی",
+      "tier": "standard"
+    },
+    {
+      "file": "agents/interview-planner.md",
+      "id": "interview-planner",
+      "zone": "docs",
+      "title": "Interview Planner",
+      "titleFa": "برنامه‌ریز مصاحبه",
+      "tier": "standard"
+    },
+    {
+      "file": "agents/onboarding-planner.md",
+      "id": "onboarding-planner",
+      "zone": "docs",
+      "title": "Onboarding Planner",
+      "titleFa": "برنامه‌ریز ورود کارکنان",
+      "tier": "standard"
+    },
+    {
+      "file": "agents/policy-drafter.md",
+      "id": "policy-drafter",
+      "zone": "docs",
+      "title": "Policy Drafter",
+      "titleFa": "نویسنده‌ی خط‌مشی‌ها",
+      "tier": "standard"
+    }
+  ],
+  "sampleTasks": [
+    {
+      "title": "Draft a job ad for a part-time shop assistant",
+      "description": "Compose a clear job ad for a part-time shop assistant at a small bakery: duties, hours, skills wanted, what we offer. Use neutral wording and mark items to confirm.",
+      "assignee": "job-ad-writer"
+    },
+    {
+      "title": "Prepare an interview plan for a junior designer",
+      "description": "Create a question set and a scorecard with clear criteria for interviewing a junior graphic designer at a small design studio.",
+      "assignee": "interview-planner"
+    },
+    {
+      "title": "Plan the first week for a new office assistant",
+      "description": "Draft a day-by-day first-week plan for a new office assistant: introductions, tools, training and a check-in at the end of the week.",
+      "assignee": "onboarding-planner"
+    }
+  ],
+  "policy": {
+    "members": {}
+  }
+}

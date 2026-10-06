@@ -1,0 +1,40 @@
+{
+  "name": "arsenale",
+  "version": "1.0.0",
+  "description": "Run a company of AI agents you can watch at work: a local dashboard and run log for any coding agent.",
+  "license": "MIT",
+  "author": "Emad Barandan",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/emadbarandan/Arsenale.git"
+  },
+  "homepage": "https://github.com/emadbarandan/Arsenale#readme",
+  "bugs": "https://github.com/emadbarandan/Arsenale/issues",
+  "keywords": ["ai-agents", "dashboard", "coding-agents", "observability", "mcp", "mcp-server", "claude-code", "codex", "gemini-cli", "cursor", "aider"],
+  "bin": {
+    "arsenale": "bin/arsenale.cjs"
+  },
+  "files": [
+    "bin/",
+    "tools/*.cjs",
+    "tools/model-prices.json",
+    "agents/",
+    "adapters/",
+    "packs/",
+    "company.example/",
+    "install.ps1",
+    "install.sh",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE",
+    "SECURITY.md"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node bin/arsenale.cjs serve",
+    "demo": "node bin/arsenale.cjs demo",
+    "test": "node tools/test/run.cjs"
+  }
+}

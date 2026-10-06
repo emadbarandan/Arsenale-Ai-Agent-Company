@@ -1,0 +1,17 @@
+{
+  "_note": "Merge the \"hooks\" block into your Claude Code settings (~/.claude/settings.json, or a project's .claude/settings.json). Replace <ARSENALE> with the folder you cloned Arsenale into, using forward slashes. Optional and experimental; see adapters/claude-code/README.md.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Task|Agent",
+        "hooks": [{ "type": "command", "command": "node \"<ARSENALE>/adapters/claude-code/hooks/arsenale-hook.cjs\"" }]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Task|Agent",
+        "hooks": [{ "type": "command", "command": "node \"<ARSENALE>/adapters/claude-code/hooks/arsenale-hook.cjs\"" }]
+      }
+    ]
+  }
+}

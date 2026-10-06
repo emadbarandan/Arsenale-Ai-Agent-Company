@@ -1,0 +1,81 @@
+{
+  "format": "arsenale-pack",
+  "formatVersion": 1,
+  "id": "design",
+  "version": "1.0.0",
+  "name": "Design",
+  "nameFa": "طراحی",
+  "description": "Develop brand moodboards and palettes, describe or draw flyer and poster layouts, write briefs for image tools and review designs before they go out.",
+  "descriptionFa": "تهیه‌ی مودبورد و پالت رنگ برند، توصیف یا ترسیم چیدمان بروشور و پوستر، نوشتن بریف برای ابزارهای تصویرساز و بازبینی طرح‌ها پیش از انتشار.",
+  "minArsenale": "1.0.0",
+  "office": {
+    "id": "design",
+    "name": "Design",
+    "nameFa": "طراحی",
+    "theme": "green",
+    "profile": "design",
+    "lead": "design-lead"
+  },
+  "members": [
+    {
+      "file": "agents/design-lead.md",
+      "id": "design-lead",
+      "zone": "lead",
+      "title": "Design Lead",
+      "titleFa": "مدیر طراحی",
+      "tier": "standard"
+    },
+    {
+      "file": "agents/brand-designer.md",
+      "id": "brand-designer",
+      "zone": "design",
+      "title": "Brand Designer",
+      "titleFa": "طراح برند",
+      "tier": "standard"
+    },
+    {
+      "file": "agents/layout-designer.md",
+      "id": "layout-designer",
+      "zone": "design",
+      "title": "Layout Designer",
+      "titleFa": "طراح چیدمان",
+      "tier": "standard"
+    },
+    {
+      "file": "agents/image-brief-writer.md",
+      "id": "image-brief-writer",
+      "zone": "design",
+      "title": "Image Brief Writer",
+      "titleFa": "نویسنده‌ی بریف تصویر",
+      "tier": "standard"
+    },
+    {
+      "file": "agents/design-reviewer.md",
+      "id": "design-reviewer",
+      "zone": "review",
+      "title": "Design Reviewer",
+      "titleFa": "بازبین طراحی",
+      "tier": "light"
+    }
+  ],
+  "sampleTasks": [
+    {
+      "title": "Propose a colour palette for a new bakery brand",
+      "description": "Suggest three palettes of five colours each, with hex values, names and where to use each colour, for a small bakery with a warm, friendly personality.",
+      "assignee": "brand-designer"
+    },
+    {
+      "title": "Lay out a flyer for a design studio open day",
+      "description": "Describe, or draw as an SVG file, an A5 flyer for an open day at a small design studio: headline, date, address placeholder, image area and a call to action.",
+      "assignee": "layout-designer"
+    },
+    {
+      "title": "Compose image briefs for five blog illustrations",
+      "description": "Compose a clear brief for each of five blog illustrations about coffee roasting, covering subject, style, colours, format and what to avoid, ready to paste into an image tool.",
+      "assignee": "image-brief-writer"
+    }
+  ],
+  "policy": {
+    "members": {}
+  }
+}

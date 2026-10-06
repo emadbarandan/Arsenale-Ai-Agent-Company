@@ -1,0 +1,73 @@
+{
+  "format": "arsenale-pack",
+  "formatVersion": 1,
+  "id": "research",
+  "version": "1.0.0",
+  "name": "Research",
+  "nameFa": "پژوهش",
+  "description": "Turn questions into research plans, gather and summarise sources with citations, compare competitors and prices, and check claims against their sources.",
+  "descriptionFa": "تبدیل پرسش‌ها به برنامه‌ی پژوهش، جمع‌آوری و خلاصه‌سازی منابع با ارجاع، مقایسه‌ی رقبا و قیمت‌ها و بررسی ادعاها با منابع آن‌ها.",
+  "minArsenale": "1.0.0",
+  "office": {
+    "id": "research",
+    "name": "Research",
+    "nameFa": "پژوهش",
+    "theme": "violet",
+    "profile": "research",
+    "lead": "research-lead"
+  },
+  "members": [
+    {
+      "file": "agents/research-lead.md",
+      "id": "research-lead",
+      "zone": "lead",
+      "title": "Research Lead",
+      "titleFa": "سرپرست پژوهش",
+      "tier": "standard"
+    },
+    {
+      "file": "agents/desk-researcher.md",
+      "id": "desk-researcher",
+      "zone": "build",
+      "title": "Desk Researcher",
+      "titleFa": "پژوهشگر منابع",
+      "tier": "standard"
+    },
+    {
+      "file": "agents/market-analyst.md",
+      "id": "market-analyst",
+      "zone": "build",
+      "title": "Market Analyst",
+      "titleFa": "تحلیلگر بازار",
+      "tier": "standard"
+    },
+    {
+      "file": "agents/fact-checker.md",
+      "id": "fact-checker",
+      "zone": "review",
+      "title": "Fact-Checker",
+      "titleFa": "بررسی‌کننده‌ی صحت",
+      "tier": "light"
+    }
+  ],
+  "sampleTasks": [
+    {
+      "title": "Plan research on starting a delivery service for a small bakery",
+      "description": "Turn the question \"should our bakery add local delivery?\" into a research plan with sub-questions, the sources we may use, and tasks for the desk researcher and market analyst.",
+      "assignee": "research-lead"
+    },
+    {
+      "title": "Summarise five articles on customer loyalty programmes",
+      "description": "Go through the five articles I put in the folder and write a one-page summary of what each says, with a citation for every point and a short list of agreements and disagreements.",
+      "assignee": "desk-researcher"
+    },
+    {
+      "title": "Compare prices of three local competitors",
+      "description": "From the price lists and web pages I provide for three invented competitors of a small bakery, build a table comparing prices for ten common products and note the differences.",
+      "assignee": "market-analyst"
+    }
+  ],
+  "policy": {
+    "members": {}
+  }
+}
