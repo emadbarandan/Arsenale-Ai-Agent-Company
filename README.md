@@ -62,8 +62,8 @@ You, your assistant, and the offices with the people who work in them:
 You need [Node.js](https://nodejs.org) 20 or newer and git.
 
 ```
-git clone https://github.com/emadbarandan/Arsenale.git
-cd Arsenale
+git clone https://github.com/emadbarandan/Arsenale-Ai-Agent-Company.git
+cd Arsenale-Ai-Agent-Company
 node bin/arsenale.cjs demo
 ```
 
