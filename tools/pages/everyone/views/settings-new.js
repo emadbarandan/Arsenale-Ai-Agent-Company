@@ -3,7 +3,7 @@
     load('automation', 'api/automation', false, 4000)
     load('live', 'api/live', false, 5000)
     const a = st.data.automation
-    if (!a) return '<p class="empty">' + T('Loading…') + '</p>'
+    if (!a) return '<p class="empty" role="status">' + T('Loading…') + '</p>'
     const lim = st.data.live && st.data.live.limits
     const lock = !canWrite() || a.readOnly
     const on = !!a.autoRun
@@ -16,7 +16,7 @@
     if (a.readOnly) html += '<p class="msg err">' + T('This setting was written by a newer Arsenale; it cannot be changed here.') + '</p>'
     html += '<p class="note" style="margin-top:10px">' + ic('info', 13) + T('A release is the one step that cannot be taken back from this computer, so Arsenale never offers to skip your approval for it.') + '</p></div>'
     html += '<div><div class="sec">' + T('Stalled and dead runs') + ' <small>' + T('When Arsenale tells you a run needs a look') + '</small></div><div class="card pad">'
-    if (!lim) html += '<p class="empty">' + T('Loading…') + '</p>'
+    if (!lim) html += '<p class="empty" role="status">' + T('Loading…') + '</p>'
     else {
       const num = (label, name, min, max, v, hint, off) => '<label class="fl" style="margin:0;width:250px">' + label + '<input type="number" ' + (name ? 'name="' + name + '" min="' + min + '" max="' + max + '" step="1" ' : '') + 'value="' + esc(v) + '"' + (off || !canWrite() ? ' disabled' : '') + '><span class="hint" style="font-weight:400">' + hint + '</span></label>'
       html += '<form data-evform="limits" style="display:flex;flex-direction:column;gap:16px"><div class="rw" style="gap:18px;flex-wrap:wrap;align-items:flex-start">' +
@@ -129,7 +129,7 @@
   function notificationsTab() {
     NF.load()
     const d = NF.state()
-    if (!d) return '<p class="empty">' + T('Loading…') + '</p>' + (st.err.notify ? '<p class="msg err">' + esc(errTxt(st.err.notify)) + '</p>' : '')
+    if (!d) return '<p class="empty" role="status">' + T('Loading…') + '</p>' + (st.err.notify ? '<p class="msg err">' + esc(errTxt(st.err.notify)) + '</p>' : '')
     const ch = st.channel === 'desktop' || d[st.channel] ? st.channel : 'desktop'
     let html = '<div><div class="sec">' + T('Notifications') + ' <small>' + T('How you hear about a question, a stalled run or a finished job') + '</small></div>'
     if (d.readOnly) html += '<p class="msg err">' + T('These settings were written by a newer Arsenale; they cannot be changed here.') + '</p>'

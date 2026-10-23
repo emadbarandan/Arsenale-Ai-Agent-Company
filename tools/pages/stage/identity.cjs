@@ -12,8 +12,10 @@ const fs = require('fs')
 const path = require('path')
 const DIR = path.join(__dirname, 'identity')
 
-const b64 = (f) => fs.readFileSync(path.join(DIR, f)).toString('base64')
-const face = (family, file, weight) => '@font-face{font-family:"' + family + '";src:url(data:font/woff2;base64,' + b64(file) + ') format("woff2");font-weight:' + weight + ';font-style:normal;font-display:block}'
+// a missing file (a copy of the code without its assets) leaves that face or logo out, never the page
+const read = (f, enc) => { try { return fs.readFileSync(path.join(DIR, f), enc) } catch { return null } }
+const b64 = (f) => { const b = read(f); return b && b.toString('base64') }
+const face = (family, file, weight) => !b64(file) ? '' : '@font-face{font-family:"' + family + '";src:url(data:font/woff2;base64,' + b64(file) + ') format("woff2");font-weight:' + weight + ';font-style:normal;font-display:block}'
 const FONTS = [
   face('Arsenale Text', 'ArsenaleText-Regular.woff2', 400),
   face('Arsenale Text', 'ArsenaleText-Medium.woff2', 500),
@@ -24,7 +26,7 @@ const FONTS = [
 ].join('')
 
 // the logo files of the design system (Logos group), drawn as given
-const svg = (f) => fs.readFileSync(path.join(DIR, f), 'utf8').replace(/<\?xml[^>]*>\s*/, '')
+const svg = (f) => (read(f, 'utf8') || '').replace(/<\?xml[^>]*>\s*/, '')
 const ICON_SVG = svg('arsenale-icon-primary.svg')
 const LOGO_SVG = svg('arsenale-horizontal-primary.svg')
 const sized = (s, cls, h) => s.replace('<svg ', '<svg class="' + cls + '" aria-hidden="true" ').replace(/ width="[^"]*" height="[^"]*"/, ' height="' + h + '"')
@@ -81,6 +83,14 @@ h1.brand .wm{display:flex;align-items:center}
 .views button[aria-pressed=true]{color:var(--forest);font-weight:600}
 .seg button[aria-pressed=true],.vm .fchip[aria-pressed=true],.ev .tfil .chip[aria-pressed=true],.helpop button[aria-pressed=true]{color:var(--forest)}
 
+/* ---------- the mascot at key moments (served by the live dashboard at /mascot/; the built file shows text only):
+   empty lists get the empty pose, loading the logo spinner, "nothing is waiting" the cheer */
+.board.live .ev p.empty,.board.live .vm p.empty{display:flex;flex-direction:column;align-items:flex-start;gap:12px}
+.board.live .ev p.empty::before,.board.live .vm p.empty::before,.board.live .ev .dnone::before{content:"";display:block;flex:none;width:112px;height:112px;border-radius:22px;background:#E8F3EC url(mascot/empty.gif) center/cover no-repeat;box-shadow:inset 0 0 0 1px rgba(15,46,40,.05)}
+.board.live .ev p.empty[role=status]::before{width:56px;height:56px;border-radius:16px;background-image:url(mascot/loading.gif)}
+.board.live .ev .dnone::before{width:140px;height:140px;margin-bottom:14px;background-image:url(mascot/cheer.gif)}
+.board.live .ev .drawer p.empty::before,.board.live .ev .pb p.empty::before{width:80px;height:80px;border-radius:18px}
+@media (max-width:480px){.board.live .ev p.empty::before,.board.live .vm p.empty::before{width:80px;height:80px}}
 .omenu button:hover{background:var(--idle-bg)}
 .ev .b.pri,.sign .more .cbtn.go{box-shadow:0 6px 16px rgba(15,46,40,.22)}
 `

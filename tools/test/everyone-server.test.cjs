@@ -132,7 +132,7 @@ test('T-7.3: a stored image is served with its type, nosniff and a sandbox CSP; 
   assert.equal((await req(port, { url: '/deliverables/dl-nope' })).status, 404)
   assert.equal((await req(port, { url: '/deliverables/..%2F..%2Fconfig.json' })).status, 404)
   const page = await req(port, { url: '/' })
-  assert.match(page.headers['content-security-policy'], new RegExp("img-src data: blob: http://localhost:" + port + "/deliverables/ http://127.0.0.1:" + port + "/deliverables/; connect-src 'self' blob:;"))
+  assert.match(page.headers['content-security-policy'], new RegExp("img-src data: blob: http://localhost:" + port + "/deliverables/ http://127.0.0.1:" + port + "/deliverables/ http://localhost:" + port + "/mascot/ http://127.0.0.1:" + port + "/mascot/; connect-src 'self' blob:;"))
   const list = await req(port, { url: '/api/deliverables' })
   assert.equal(list.json.deliverables[0].image, true)
 })

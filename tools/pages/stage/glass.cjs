@@ -2,7 +2,7 @@
  * one focus, faded edges. Visual only: it comes after STAGE_STYLE, keeps every layout, markup
  * and class a script or a test reads, and takes its colours from identity.cjs.
  *
- * - Backgrounds are a radial haze (white centre, mint-lighter, mint-light edge), never flat.
+ * - Backgrounds are a radial haze (a soft mint centre fading to white edges), never flat.
  * - Things that float (top bar, dock, rail, menus, the office card and drawer, zoom tools) are
  *   Liquid Glass: a white-to-clear vertical gradient, blur 24 saturate 1.9, a white rim on top.
  * - Content cards are glass cards: 22 px radius, a white rim, a soft far shadow, no border.
@@ -12,8 +12,8 @@
  * Without backdrop-filter, or with reduced transparency, glass falls back to solid white. */
 const GLASS_STYLE = `
 :root{
-  --haze-c:#FFFFFF;--haze-m:#F4F9F6;--haze-e:#E8F3EC;
-  --haze:radial-gradient(85% 60% at 50% 30%,var(--haze-c) 0%,var(--haze-m) 45%,var(--haze-e) 100%);
+  --haze-c:#E3F2E9;--haze-m:#F6FBF8;--haze-e:#FFFFFF;
+  --haze:radial-gradient(75% 55% at 50% 35%,var(--haze-c) 0%,var(--haze-m) 50%,var(--haze-e) 100%);
   --glass-top:rgba(255,255,255,.72);--glass-bottom:rgba(255,255,255,.42);
   --glass:linear-gradient(180deg,var(--glass-top),var(--glass-bottom));
   --glass-solid:rgba(255,255,255,.86);
@@ -29,8 +29,8 @@ const GLASS_STYLE = `
 
 /* ---------- the haze behind every screen */
 body,.board,.ev-main,.vm{background:var(--haze)}
-.cmap{background:radial-gradient(90% 70% at 50% 40%,#FFFFFF 0%,#FAFCFB 55%,#F1F7F3 100%)}
-.board[data-screen=office],.v-office .stage,.stage.w3on{background:radial-gradient(80% 70% at 45% 40%,#FFFFFF 0%,#F4F9F6 50%,#E8F3EC 100%)}
+.cmap{background:radial-gradient(70% 60% at 55% 45%,#E6F3EA 0%,#F7FBF9 55%,#FFFFFF 100%)}
+.board[data-screen=office],.v-office .stage,.stage.w3on{background:radial-gradient(70% 60% at 45% 45%,#E3F2E9 0%,#F6FBF8 55%,#FFFFFF 100%)}
 
 /* ---------- Liquid Glass: everything that floats */
 .top,.dock,.rail,.board.rail-mini .rail,.helpop,.omenu,.cmonth,.cside,.v-office .insp,.v-office .drawer,

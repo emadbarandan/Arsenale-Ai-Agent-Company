@@ -86,7 +86,7 @@ const KEY_HELP = 'This dashboard opens only with its key. Run `arsenale open`, o
 // nowhere else on it (spec R-7.8). blob: is for the 3D office: the textures
 // inside a character file someone drops on a desk are read through blob URLs
 // the page makes itself (GLTFLoader), as images and by fetch.
-const csp = (nonce, port) => "default-src 'none'; script-src 'nonce-" + nonce + "'; style-src 'unsafe-inline'; img-src data: blob: http://localhost:" + port + "/deliverables/ http://127.0.0.1:" + port + "/deliverables/; connect-src 'self' blob:; base-uri 'none'; form-action 'none'; object-src 'none'; frame-ancestors 'none'"
+const csp = (nonce, port) => "default-src 'none'; script-src 'nonce-" + nonce + "'; style-src 'unsafe-inline'; img-src data: blob: http://localhost:" + port + "/deliverables/ http://127.0.0.1:" + port + "/deliverables/ http://localhost:" + port + "/mascot/ http://127.0.0.1:" + port + "/mascot/; connect-src 'self' blob:; base-uri 'none'; form-action 'none'; object-src 'none'; frame-ancestors 'none'"
 
 /** ?showcase=1 or 0 on a demo page; with neither, what the demo was started with. */
 const showcaseAsked = (full, dflt) => { const q = new URLSearchParams(String(full).split('?')[1] || ''); return q.has('showcase') ? q.get('showcase') === '1' : dflt }
@@ -367,6 +367,13 @@ function start(opts = {}) {
       if (url.startsWith('/help/img/') && (req.method === 'GET' || req.method === 'HEAD')) {
         const p = require('./help-page.cjs').imagePath(url.slice('/help/img/'.length))
         if (p) { res.writeHead(200, Object.assign({ 'Content-Type': 'image/png', 'Cache-Control': 'no-store' }, FRAME)); fs.createReadStream(p).pipe(res); return }
+      }
+      // the mascot of the empty, loading and success states (pages/stage/identity.cjs): three fixed names
+      const mascot = /^\/mascot\/(empty|loading|cheer)\.gif$/.exec(url)
+      if (mascot) {
+        res.writeHead(200, Object.assign({ 'Content-Type': 'image/gif', 'Cache-Control': 'max-age=86400', 'X-Content-Type-Options': 'nosniff' }, FRAME))
+        fs.createReadStream(require('path').join(__dirname, 'pages', 'stage', 'identity', 'mascot', mascot[1] + '.gif')).pipe(res)
+        return
       }
       res.writeHead(404, Object.assign({ 'Content-Type': 'text/plain; charset=utf-8' }, FRAME))
       res.end('nothing here')
