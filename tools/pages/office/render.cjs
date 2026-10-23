@@ -14,7 +14,8 @@ const { homeDesks } = require('./home-desks.cjs')
 const { OFFICE_STYLE, CR_STYLE } = require('./style.cjs')
 const { controlRoom } = require('./control-room.cjs')
 const { STAGE_STYLE } = require('../stage/style.cjs')
-const { mark, FAVICON } = require('../stage/brand.cjs')
+const { GLASS_STYLE } = require('../stage/glass.cjs')
+const { IDENTITY_STYLE, dsMark, dsLogo, DS_FAVICON } = require('../stage/identity.cjs')
 const { officeClient } = require('./client.cjs')
 
 // The bottom tab bar of the narrow (9:16) layout: the five screens of the top bar, which it replaces there
@@ -54,14 +55,14 @@ function renderOffice(state, opts = {}) {
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 ${refresh}
-<link rel="icon" href="${FAVICON}" />
+<link rel="icon" href="${DS_FAVICON}" />
 <title>Arsenale</title>
-<style>${OFFICE_STYLE}${CR_STYLE}${COMPANY_STYLE}${WORLD_STYLE}${PEOPLE_STYLE}${ACTIVITY_STYLE}${VR_STYLE}${EVERYONE_STYLE}${STAGE_STYLE}</style>
+<style>${OFFICE_STYLE}${CR_STYLE}${COMPANY_STYLE}${WORLD_STYLE}${PEOPLE_STYLE}${ACTIVITY_STYLE}${VR_STYLE}${EVERYONE_STYLE}${STAGE_STYLE}${GLASS_STYLE}${IDENTITY_STYLE}</style>
 </head>
 <body>
 <div class="board${showcase ? ' showcase' : ''}" id="board">
   <header class="top">
-    <h1 class="brand${co ? ' co' : ''}">${mark(28)}<span>Arsenale</span><span class="scrn" id="scrn"></span></h1><span class="date" id="date"></span>
+    <h1 class="brand${co ? ' co' : ''}">${dsMark(28)}<span class="wm">${dsLogo(26)}<b class="sr">Arsenale</b></span><span class="scrn" id="scrn"></span></h1><span class="date" id="date"></span>
     <div class="views" role="group" aria-label="${T('View')}"><button type="button" data-view="campus" aria-pressed="false">${T('Campus')}</button><button type="button" data-view="office" id="vtab-office" aria-pressed="true">${T('Office')}</button>${co
       // five screens in the bar; the rest, and the two views from before the company, under "More"
       ? '<button type="button" data-omenu="office" id="omenu-office" aria-label="' + T('Choose an office') + '" aria-haspopup="true">▾</button><button type="button" data-view="live" aria-pressed="false">' + T('Live') + '</button><button type="button" data-view="appr" aria-pressed="false">' + T('Decisions') + '<span class="tc" id="tc-appr"></span></button><button type="button" data-view="team" aria-pressed="false">' + T('Team') + '</button><button type="button" data-omenu="legacy" id="omenu-legacy" aria-haspopup="true">' + T('More') + ' ▾</button>'
