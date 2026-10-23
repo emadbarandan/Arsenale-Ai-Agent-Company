@@ -2,7 +2,7 @@
  * one focus, faded edges. Visual only: it comes after STAGE_STYLE, keeps every layout, markup
  * and class a script or a test reads, and takes its colours from identity.cjs.
  *
- * - Backgrounds are a radial haze (a soft mint centre fading to white edges), never flat.
+ * - Backgrounds are white with soft green halos that fade out, never a flat tint.
  * - Things that float (top bar, dock, rail, menus, the office card and drawer, zoom tools) are
  *   Liquid Glass: a white-to-clear vertical gradient, blur 24 saturate 1.9, a white rim on top.
  * - Content cards are glass cards: 22 px radius, a white rim, a soft far shadow, no border.
@@ -12,8 +12,8 @@
  * Without backdrop-filter, or with reduced transparency, glass falls back to solid white. */
 const GLASS_STYLE = `
 :root{
-  --haze-c:#E3F2E9;--haze-m:#F6FBF8;--haze-e:#FFFFFF;
-  --haze:radial-gradient(75% 55% at 50% 35%,var(--haze-c) 0%,var(--haze-m) 50%,var(--haze-e) 100%);
+  --halo:rgba(14,163,107,.11);--halo-soft:rgba(14,163,107,.06);
+  --haze:radial-gradient(55% 45% at 50% 28%,var(--halo) 0%,transparent 70%),radial-gradient(40% 40% at 92% 95%,var(--halo-soft) 0%,transparent 70%),radial-gradient(35% 35% at 4% 70%,var(--halo-soft) 0%,transparent 70%),#FFFFFF;
   --glass-top:rgba(255,255,255,.72);--glass-bottom:rgba(255,255,255,.42);
   --glass:linear-gradient(180deg,var(--glass-top),var(--glass-bottom));
   --glass-solid:rgba(255,255,255,.86);
@@ -29,8 +29,8 @@ const GLASS_STYLE = `
 
 /* ---------- the haze behind every screen */
 body,.board,.ev-main,.vm{background:var(--haze)}
-.cmap{background:radial-gradient(70% 60% at 55% 45%,#E6F3EA 0%,#F7FBF9 55%,#FFFFFF 100%)}
-.board[data-screen=office],.v-office .stage,.stage.w3on{background:radial-gradient(70% 60% at 45% 45%,#E3F2E9 0%,#F6FBF8 55%,#FFFFFF 100%)}
+.cmap{background:radial-gradient(50% 45% at 58% 42%,var(--halo) 0%,transparent 70%),radial-gradient(35% 35% at 8% 85%,var(--halo-soft) 0%,transparent 70%),#FFFFFF}
+.board[data-screen=office],.v-office .stage,.stage.w3on{background:radial-gradient(50% 50% at 42% 48%,var(--halo) 0%,transparent 70%),#FFFFFF}
 
 /* ---------- Liquid Glass: everything that floats */
 .top,.dock,.rail,.board.rail-mini .rail,.helpop,.omenu,.cmonth,.cside,.v-office .insp,.v-office .drawer,
