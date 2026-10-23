@@ -84,13 +84,70 @@ h1.brand .wm{display:flex;align-items:center}
 .seg button[aria-pressed=true],.vm .fchip[aria-pressed=true],.ev .tfil .chip[aria-pressed=true],.helpop button[aria-pressed=true]{color:var(--forest)}
 
 /* ---------- the mascot at key moments (served by the live dashboard at /mascot/; the built file shows text only):
-   empty lists get the empty pose, loading the logo spinner, "nothing is waiting" the cheer */
+   empty lists get the empty pose, loading the logo spinner, "nothing is waiting" the cheer,
+   an empty office the coffee break, help the wave */
 .board.served .ev p.empty,.board.served .vm p.empty{display:flex;flex-direction:column;align-items:flex-start;gap:12px}
 .board.served .ev p.empty::before,.board.served .vm p.empty::before,.board.served .ev .dnone::before{content:"";display:block;flex:none;width:112px;height:112px;border-radius:22px;background:#E8F3EC url(mascot/empty.gif) center/cover no-repeat;box-shadow:inset 0 0 0 1px rgba(15,46,40,.05)}
 .board.served .ev p.empty[role=status]::before{width:56px;height:56px;border-radius:16px;background-image:url(mascot/loading.gif)}
 .board.served .ev .dnone::before{width:140px;height:140px;margin-bottom:14px;background-image:url(mascot/cheer.gif)}
 .board.served .ev .drawer p.empty::before,.board.served .ev .pb p.empty::before{width:80px;height:80px;border-radius:18px}
+/* small empties: an empty task column and "Done without you · Nothing yet" on Decisions */
+.board.served .ev .col>p.mut,.board.served .ev .lbl+p.mut.sm{display:flex;flex-direction:column;align-items:flex-start;gap:8px}
+.board.served .ev .col>p.mut::before,.board.served .ev .lbl+p.mut.sm::before{content:"";display:block;width:72px;height:72px;border-radius:18px;background:#E8F3EC url(mascot/empty.gif) center/cover no-repeat}
+/* an office with no one at work: the inspector's empty state has the coffee break */
+.board.served .insp>h2.ih:first-child::before{content:"";display:block;width:120px;height:120px;margin-bottom:14px;border-radius:22px;background:#E8F3EC url(mascot/coffee.gif) center/cover no-repeat}
+/* help: the wave says hello */
+.board.served .helpop>b{display:flex;align-items:center;gap:12px}
+.board.served .helpop>b::before{content:"";flex:none;width:56px;height:56px;border-radius:16px;background:#E8F3EC url(mascot/wave.gif) center/cover no-repeat}
 @media (max-width:480px){.board.served .ev p.empty::before,.board.served .vm p.empty::before{width:80px;height:80px}}
+/* ---------- states in the design system's colours: no orange, peach or pink fills.
+   Working = arsenale-green, waiting for you = forest-green, idle = grey, and stalled or late
+   = a small red mark only (a dot, an icon, a word), always on white glass, never a red fill.
+   Each state also keeps its word or icon, so colour is never the only sign. */
+:root,.ev,.wz{
+  --warn:#0F2E28;--warn-ink:#0F2E28;--warn-bg:rgba(14,163,107,.07);
+  --gate:#0F2E28;--gate-line:rgba(15,46,40,.2);
+  --bad:#C8372D;--bad-ink:#A92B22;--bad-bg:rgba(15,46,40,.04);
+  --calm-line:rgba(15,46,40,.12);
+}
+/* the waiting list in the rail, the dock and the Decisions queue: white glass cards */
+.wait,.wait.late{background:linear-gradient(180deg,rgba(255,255,255,.9),rgba(255,255,255,.66));border:0;border-radius:16px;margin:0 0 10px;
+  box-shadow:inset 0 1px 0 #FFFFFF,inset 0 0 0 1px rgba(14,163,107,.1),0 8px 22px rgba(14,120,80,.1)}
+.wait.hl{box-shadow:inset 0 0 0 2px var(--accent),0 8px 22px rgba(14,120,80,.16)}
+.wait .wh .wk,.wh{color:var(--ink-dim)}
+.gl,.late .gl{border:0;color:var(--forest);background:none}
+.late .gl,.wait.late .wh .ag,.drow.late .da{color:var(--bad-ink)}
+.ansbox button,.ansbox button.yes,.ansbox button.no,.needs .nb{border:0;border-radius:999px;background:rgba(255,255,255,.85);box-shadow:inset 0 0 0 1px var(--calm-line);color:var(--ink)}
+.ansbox button.yes{color:var(--forest);font-weight:600;box-shadow:inset 0 0 0 1px rgba(14,163,107,.45)}
+.ansbox button.no{color:var(--bad-ink)}
+.ansbox button.armed,.ansbox button.dis.armed,.ev .b.armed,.wz .b.armed{background:var(--forest);color:#FFFFFF;box-shadow:none}
+.ansbox button.dis{box-shadow:none;background:none;color:var(--ink-dim)}
+.ansbox input{border:0;border-radius:999px;background:#FFFFFF;box-shadow:inset 0 0 0 1px var(--calm-line)}
+/* chips, pills, tags and tiles that used to be peach or pink */
+.ev .chip.warn,.ev .lp.warn,.ev .risk.mid,.ev .exp,.ev .pill.waiting,.ev .pill.quiet,.pill.quiet,.pill.waiting,.org .ochip.w,.alert.s{color:var(--forest);background:rgba(14,163,107,.08);border-color:transparent}
+.ev .chip.bad,.ev .lp.bad,.ev .pill.stalled,.pill.paused,.chip.despite,.alert.h,.ev .kind.publish,.vr .vchip.bad,.st-failed,.gsteps .lt,.dst.lt,.mc.u.bad{color:var(--bad-ink);background:rgba(255,255,255,.85);border-color:transparent;box-shadow:inset 0 0 0 1px rgba(200,55,45,.25)}
+.ev .tile.warn,.ev .tile.bad,.ev .now.w,.ev .qh.hung,.ev .wbox,.ev .mkt-flags,.wz .wt,.b-findings,.b-failed,.mr.late,.ev .dc.lk{background:linear-gradient(180deg,rgba(255,255,255,.9),rgba(255,255,255,.66));border-color:var(--calm-line)}
+.ev .tile.warn b{color:var(--forest)}.ev .tile.bad b{color:var(--bad-ink)}
+.wz .wt .dot{background:var(--forest);box-shadow:0 0 0 5px rgba(14,163,107,.14)}
+.ev .dc.old{border-color:transparent}
+.ev table.lt2 tr.rqt,.ev table.lt2 tr.rst,.ev .srow.locked{background:rgba(14,163,107,.05)}
+.ev .lside.dead{border-color:var(--calm-line)}
+.seg button.never[aria-pressed=true]{background:none;color:var(--bad-ink)}
+.tag.boss,.mk.s{background:rgba(14,163,107,.08)}
+/* the office: name pills and the "needs a look" card */
+.w3card.tone-wait,.w3card.tone-quiet,.w3card.tone-stalled{border-color:transparent;background:rgba(255,255,255,.9)}
+.w3card.tone-wait .dot,.w3card.tone-quiet .dot,.w3chip.tone-wait .dot,.w3chip.tone-quiet .dot{background:var(--forest)}
+.w3card.tone-wait small,.w3card.tone-quiet small{color:var(--forest)}
+.w3card.tone-stalled,.w3card.tone-stalled small{color:var(--bad-ink)}
+.iact .warn{color:var(--forest)}
+.c3gl.bad{border-color:rgba(200,55,45,.35)}
+/* bars: waiting phases forest, stalled red, on the soft track */
+.ev .trk.warn i,.ev .bar.thick.warn i{background:var(--forest)}
+.waitbar{background:repeating-linear-gradient(135deg,rgba(15,46,40,.22) 0 5px,transparent 5px 10px)}
+.sb-hatch{background:repeating-linear-gradient(-45deg,rgba(15,46,40,.3) 0 3px,transparent 3px 7px)}
+.ev .b.bad{border-color:transparent;color:var(--bad-ink)}
+.ev .kind{background:rgba(14,163,107,.08);color:var(--forest);border-color:transparent}
+.rail h2 .x{border:0;border-radius:999px;background:rgba(255,255,255,.8);box-shadow:inset 0 0 0 1px var(--calm-line);padding:3px 10px}
 .omenu button:hover{background:var(--idle-bg)}
 .ev .b.pri,.sign .more .cbtn.go{box-shadow:0 6px 16px rgba(15,46,40,.22)}
 `

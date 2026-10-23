@@ -368,8 +368,8 @@ function start(opts = {}) {
         const p = require('./help-page.cjs').imagePath(url.slice('/help/img/'.length))
         if (p) { res.writeHead(200, Object.assign({ 'Content-Type': 'image/png', 'Cache-Control': 'no-store' }, FRAME)); fs.createReadStream(p).pipe(res); return }
       }
-      // the mascot of the empty, loading and success states (pages/stage/identity.cjs): three fixed names
-      const mascot = /^\/mascot\/(empty|loading|cheer)\.gif$/.exec(url)
+      // the mascot of the empty, loading, success, help and idle states (pages/stage/identity.cjs): fixed names
+      const mascot = /^\/mascot\/(empty|loading|cheer|wave|coffee)\.gif$/.exec(url)
       if (mascot) {
         res.writeHead(200, Object.assign({ 'Content-Type': 'image/gif', 'Cache-Control': 'max-age=86400', 'X-Content-Type-Options': 'nosniff' }, FRAME))
         fs.createReadStream(require('path').join(__dirname, 'pages', 'stage', 'identity', 'mascot', mascot[1] + '.gif')).pipe(res)

@@ -14,13 +14,13 @@ const GLASS_STYLE = `
 :root{
   --halo:rgba(14,163,107,.11);--halo-soft:rgba(14,163,107,.06);
   --haze:radial-gradient(55% 45% at 50% 28%,var(--halo) 0%,transparent 70%),radial-gradient(40% 40% at 92% 95%,var(--halo-soft) 0%,transparent 70%),radial-gradient(35% 35% at 4% 70%,var(--halo-soft) 0%,transparent 70%),#FFFFFF;
-  --glass-top:rgba(255,255,255,.72);--glass-bottom:rgba(255,255,255,.42);
+  --glass-top:rgba(255,255,255,.8);--glass-bottom:rgba(246,252,249,.5);
   --glass:linear-gradient(180deg,var(--glass-top),var(--glass-bottom));
-  --glass-solid:rgba(255,255,255,.86);
-  --glass-blur:blur(24px) saturate(1.9) brightness(1.04);
-  --glass-hi:inset 0 1px 0 rgba(255,255,255,.95),inset 0 0 0 1px rgba(255,255,255,.55);
-  --shadow-glass:var(--glass-hi),0 12px 34px rgba(15,46,40,.12);
-  --shadow-card:var(--glass-hi),0 18px 44px rgba(15,46,40,.08),0 2px 6px rgba(15,46,40,.04);
+  --glass-solid:linear-gradient(180deg,rgba(255,255,255,.94),rgba(248,252,250,.82));
+  --glass-blur:blur(28px) saturate(1.9) brightness(1.04);
+  --glass-hi:inset 0 1px 0 rgba(255,255,255,.98),inset 0 0 0 1px rgba(14,163,107,.1);
+  --shadow-glass:var(--glass-hi),0 14px 38px rgba(14,120,80,.14),0 2px 6px rgba(14,120,80,.06);
+  --shadow-card:var(--glass-hi),0 18px 44px rgba(14,120,80,.1),0 2px 6px rgba(14,120,80,.05);
   --hair:rgba(15,46,40,.08);
   --hairline:linear-gradient(90deg,transparent,var(--hair) 14%,var(--hair) 86%,transparent);
   --track:#E3EDE7;

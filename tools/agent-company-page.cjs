@@ -246,7 +246,7 @@ function companyViews(h) {
    *  the budget is off, so a switched-off budget never looks like a limit. */
   function bar(b) {
     if (!b || !b.on || b.pct === null) return ''
-    const c = b.level === 'stop' || b.level === 'over' ? '#C8372D' : b.level === 'soft' ? '#B8720F' : '#0C8A62'
+    const c = b.level === 'stop' || b.level === 'over' ? '#C8372D' : b.level === 'soft' ? '#0F2E28' : '#0C8A62'
     return '<div class="cbar" role="img" aria-label="' + esc(pctTxt(b.pct) + T(' of budget')) + '"><i style="width:' + Math.min(100, b.pct).toFixed(1) + '%;background:' + c + '"></i><b style="left:' + b.softAlertPct + '%"></b></div>'
   }
   /** "1.2M / 2M tok" or "$3.20 / $10" for a budget that is on. */
@@ -475,7 +475,7 @@ function companyViews(h) {
   const ptitle = (e) => (e.name && etitle(e) && e.name !== etitle(e) ? etitle(e) : '')
   function orgRow(S, e, o) {
     const s = empStatus(S, e.id, '')
-    const dot = s === 'working' || s === 'quiet' ? '#0C8A62' : s === 'waiting' ? '#B8720F' : s === 'paused' ? '#C8372D' : ''
+    const dot = s === 'working' || s === 'quiet' ? '#0C8A62' : s === 'waiting' ? '#0F2E28' : s === 'paused' ? '#C8372D' : ''
     const budget = C().company.budgetsEnabled && e.kind === 'employee' ? editBtn('employee', e.id) : ''
     // this month's model, tokens or budget: the board reads what each person costs here
     const b = e.standing && e.standing.budget
@@ -518,7 +518,7 @@ function companyViews(h) {
     if (LIVE && st.packsLeft === undefined) { st.packsLeft = null; fetch('api/packs', { cache: 'no-store' }).then((r) => r.json()).then((d) => { st.packsLeft = (d.packs || []).filter((p) => !p.installed && !officeList().some((o) => p.office && o.id === p.office.id)).map((p) => p.name); redraw() }, () => { st.packsLeft = [] }) }
     const cons = co.employees.filter((e) => e.kind === 'contractor')
     if (cons.length) html += '<div class="ocont"><div class="ch">' + T('Contractors') + ' <span class="dim" style="text-transform:none;letter-spacing:0">' + T('agent names with no definition in the agent folders, this month') + '</span></div><div class="chips">' + cons.map((e) => '<span class="ochip" dir="ltr">' + esc(e.id) + ' ×' + digits(e.runsThisPeriod) + (e.standing && e.standing.spend && e.standing.spend.tokens ? ' · ' + k(e.standing.spend.tokens) + ' ' + T('tok') : '') + '</span>').join('') + '</div></div>'
-    html += '<div class="oft"><span><i style="background:#0C8A62"></i>' + T('working') + '</span><span><i style="background:#B8720F"></i>' + T('waiting for you') + '</span><span><i style="background:#C8372D"></i>' + T('paused or stopped by budget') + '</span>' +
+    html += '<div class="oft"><span><i style="background:#0C8A62"></i>' + T('working') + '</span><span><i style="background:#0F2E28"></i>' + T('waiting for you') + '</span><span><i style="background:#C8372D"></i>' + T('paused or stopped by budget') + '</span>' +
       (co.company.budgetsEnabled ? '<span><span class="t"></span>' + T('tick on the bar = alert threshold') + '</span><span style="margin-inline-start:auto">' + T('Bar = this month’s spend against the budget') + '</span>' : '<span style="margin-inline-start:auto">' + T('Budgets are off: tokens this month only') + '</span>') + '</div>'
     if (LIVE && !(st.packsLeft && !st.packsLeft.length)) html += '<div class="oready"><span class="ic">' + ART.ic('box', 18) + '</span><b>' + T('Ready to add') + '</b>' + (st.packsLeft && st.packsLeft.length ? st.packsLeft.map((x) => '<span class="opk" dir="auto">' + esc(x) + '</span>').join('') : '<span class="dim">' + T('More offices in the Marketplace') + '</span>') + '<button type="button" class="cbtn" data-ev="goto-packs">' + T('Add an office') + '</button></div>'
     return html + '</div>'
