@@ -60,7 +60,7 @@ ${refresh}
 <style>${OFFICE_STYLE}${CR_STYLE}${COMPANY_STYLE}${WORLD_STYLE}${PEOPLE_STYLE}${ACTIVITY_STYLE}${VR_STYLE}${EVERYONE_STYLE}${STAGE_STYLE}${GLASS_STYLE}${IDENTITY_STYLE}</style>
 </head>
 <body>
-<div class="board${live ? ' live' : ''}${showcase ? ' showcase' : ''}" id="board">
+<div class="board${live ? ' served' : ''}${showcase ? ' showcase' : ''}" id="board">
   <header class="top">
     <h1 class="brand${co ? ' co' : ''}">${dsMark(28)}<span class="wm">${dsLogo(26)}<b class="sr">Arsenale</b></span><span class="scrn" id="scrn"></span></h1><span class="date" id="date"></span>
     <div class="views" role="group" aria-label="${T('View')}"><button type="button" data-view="campus" aria-pressed="false">${T('Campus')}</button><button type="button" data-view="office" id="vtab-office" aria-pressed="true">${T('Office')}</button>${co

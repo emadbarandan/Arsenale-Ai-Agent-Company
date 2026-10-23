@@ -117,6 +117,11 @@ body,.board,.ev-main,.vm{background:var(--haze)}
 .ev .tpic{background:radial-gradient(70% 90% at 70% 100%,color-mix(in srgb,var(--oc) 22%,#FFFFFF),#FFFFFF)}
 .ev .tpic .pill{background:rgba(255,255,255,.8);border:0;box-shadow:inset 0 0 0 1px var(--hair)}
 
+/* tasks: the "waiting for you" column is a soft mint well, not a dashed box */
+.ev .colw{background:rgba(14,163,107,.05);border:0;border-radius:var(--r-card);box-shadow:inset 0 0 0 1px rgba(14,163,107,.12)}
+.ev .tk.wtk{border:0;background:linear-gradient(180deg,rgba(255,255,255,.9),rgba(255,255,255,.7));box-shadow:var(--shadow-card)}
+.vm .kpi dd small{margin-left:6px}
+
 /* banners: a quiet line, a dot and one sentence, no box */
 .ev .banner,.ev .banner.stb{background:none;border:0;border-radius:0;padding:14px 0;margin:0 0 22px;
   background:var(--hairline) top/100% 1px no-repeat,var(--hairline) bottom/100% 1px no-repeat}

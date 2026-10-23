@@ -85,12 +85,12 @@ h1.brand .wm{display:flex;align-items:center}
 
 /* ---------- the mascot at key moments (served by the live dashboard at /mascot/; the built file shows text only):
    empty lists get the empty pose, loading the logo spinner, "nothing is waiting" the cheer */
-.board.live .ev p.empty,.board.live .vm p.empty{display:flex;flex-direction:column;align-items:flex-start;gap:12px}
-.board.live .ev p.empty::before,.board.live .vm p.empty::before,.board.live .ev .dnone::before{content:"";display:block;flex:none;width:112px;height:112px;border-radius:22px;background:#E8F3EC url(mascot/empty.gif) center/cover no-repeat;box-shadow:inset 0 0 0 1px rgba(15,46,40,.05)}
-.board.live .ev p.empty[role=status]::before{width:56px;height:56px;border-radius:16px;background-image:url(mascot/loading.gif)}
-.board.live .ev .dnone::before{width:140px;height:140px;margin-bottom:14px;background-image:url(mascot/cheer.gif)}
-.board.live .ev .drawer p.empty::before,.board.live .ev .pb p.empty::before{width:80px;height:80px;border-radius:18px}
-@media (max-width:480px){.board.live .ev p.empty::before,.board.live .vm p.empty::before{width:80px;height:80px}}
+.board.served .ev p.empty,.board.served .vm p.empty{display:flex;flex-direction:column;align-items:flex-start;gap:12px}
+.board.served .ev p.empty::before,.board.served .vm p.empty::before,.board.served .ev .dnone::before{content:"";display:block;flex:none;width:112px;height:112px;border-radius:22px;background:#E8F3EC url(mascot/empty.gif) center/cover no-repeat;box-shadow:inset 0 0 0 1px rgba(15,46,40,.05)}
+.board.served .ev p.empty[role=status]::before{width:56px;height:56px;border-radius:16px;background-image:url(mascot/loading.gif)}
+.board.served .ev .dnone::before{width:140px;height:140px;margin-bottom:14px;background-image:url(mascot/cheer.gif)}
+.board.served .ev .drawer p.empty::before,.board.served .ev .pb p.empty::before{width:80px;height:80px;border-radius:18px}
+@media (max-width:480px){.board.served .ev p.empty::before,.board.served .vm p.empty::before{width:80px;height:80px}}
 .omenu button:hover{background:var(--idle-bg)}
 .ev .b.pri,.sign .more .cbtn.go{box-shadow:0 6px 16px rgba(15,46,40,.22)}
 `
