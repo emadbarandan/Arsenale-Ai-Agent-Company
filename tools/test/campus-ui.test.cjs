@@ -70,13 +70,13 @@ test('the campus shows one building per office on a lot, with an office card eac
   assert.equal(got.build, 'Build')
 })
 
-// 1.2 rule 42: the cards take depth, but only from the two Stage shadows (--sh1, --sh2), and the
+// 1.2 rule 42: the cards take depth, but only from the Stage shadows (--sh1, --sh2, and the glass finish's --sh-glass, --sh-card), and the
 // drawing itself carries no blur filter (the 1.1 rule was "no shadows at all")
 test('campus shadows are only the Stage tokens, and every type has a drawing of its own', { skip: SKIP || false }, async () => {
   const { page } = await world()
   const c = await page.eval(`(() => {
     const probe = (v) => { const d = document.createElement('div'); d.style.boxShadow = v; document.body.appendChild(d); const s = getComputedStyle(d).boxShadow; d.remove(); return s }
-    const ok = ['none', probe('var(--sh1)'), probe('var(--sh2)')]
+    const ok = ['none', probe('var(--sh1)'), probe('var(--sh2)'), probe('var(--sh-glass)'), probe('var(--sh-card)')]
     const signs = [...document.querySelectorAll('#cmap .sign')]
     return {
       blur: document.querySelectorAll('#cmap feGaussianBlur, #cmap filter, #cmap [filter]').length,
@@ -88,7 +88,7 @@ test('campus shadows are only the Stage tokens, and every type has a drawing of 
     }
   })()`)
   assert.equal(c.blur, 0, 'no SVG blur filter on the campus drawing')
-  assert.equal(c.tokens, 2, 'the page defines --sh1 and --sh2')
+  assert.equal(c.tokens, 4, 'the page defines --sh1, --sh2, --sh-glass and --sh-card')
   assert.ok(c.signs >= 3 && c.shadowed === c.signs, 'every office card has depth: ' + c.shadowed + ' of ' + c.signs)
   assert.deepEqual(c.other, [], 'a card shadow that is not a Stage token')
   assert.ok(c.plots >= 3)

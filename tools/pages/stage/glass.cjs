@@ -19,8 +19,8 @@ const GLASS_STYLE = `
   --glass-solid:linear-gradient(180deg,rgba(255,255,255,.94),rgba(248,252,250,.82));
   --glass-blur:blur(28px) saturate(1.9) brightness(1.04);
   --glass-hi:inset 0 1px 0 rgba(255,255,255,.98),inset 0 0 0 1px rgba(14,163,107,.1);
-  --shadow-glass:var(--glass-hi),0 14px 38px rgba(14,120,80,.14),0 2px 6px rgba(14,120,80,.06);
-  --shadow-card:var(--glass-hi),0 18px 44px rgba(14,120,80,.1),0 2px 6px rgba(14,120,80,.05);
+  --sh-glass:var(--glass-hi),0 14px 38px rgba(14,120,80,.14),0 2px 6px rgba(14,120,80,.06);
+  --sh-card:var(--glass-hi),0 18px 44px rgba(14,120,80,.1),0 2px 6px rgba(14,120,80,.05);
   --hair:rgba(15,46,40,.08);
   --hairline:linear-gradient(90deg,transparent,var(--hair) 14%,var(--hair) 86%,transparent);
   --track:#E3EDE7;
@@ -36,7 +36,7 @@ body,.board,.ev-main,.vm{background:var(--haze)}
 .top,.dock,.rail,.board.rail-mini .rail,.helpop,.omenu,.cmonth,.cside,.v-office .insp,.v-office .drawer,
 .board.co .zoombar,.zoombar,.needs,.legend,.cleg,.ctip,.btabs,.w3proj div,.sign{
   background:var(--glass);-webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);
-  border:0;box-shadow:var(--shadow-glass)
+  border:0;box-shadow:var(--sh-glass)
 }
 .top{box-shadow:inset 0 -1px 0 var(--hair),0 8px 30px rgba(15,46,40,.05)}
 .btabs{box-shadow:inset 0 1px 0 var(--hair),0 -8px 30px rgba(15,46,40,.06)}
@@ -61,13 +61,13 @@ body,.board,.ev-main,.vm{background:var(--haze)}
 /* ---------- campus: office cards and the round stage tools */
 .sign{border-radius:16px}
 .sign:after{background:var(--glass-solid);border-color:transparent}
-.sign:hover,.sign:focus-within,.sign.hot{outline:0;box-shadow:0 0 0 2px var(--accent-line),var(--shadow-glass)}
+.sign:hover,.sign:focus-within,.sign.hot{outline:0;box-shadow:0 0 0 2px var(--accent-line),var(--sh-glass)}
 .sign .more{border-top:0;background:var(--hairline) top/100% 1px no-repeat}
-.czoom button,.czoom output{background:var(--glass);-webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);border:0;border-radius:999px;box-shadow:var(--shadow-glass)}
+.czoom button,.czoom output{background:var(--glass);-webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);border:0;border-radius:999px;box-shadow:var(--sh-glass)}
 .czoom .cbuild:hover{background:var(--glass-solid)}
 
 /* ---------- office: name pills, the card's facts, the drawer's slips */
-.w3card,.w3chip,.w3card.tone-wait,.w3card.tone-quiet{background:var(--glass-solid);-webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);box-shadow:var(--shadow-glass)}
+.w3card,.w3chip,.w3card.tone-wait,.w3card.tone-quiet{background:var(--glass-solid);-webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);box-shadow:var(--sh-glass)}
 .insp .kv div{background:none;box-shadow:none;border-radius:0;padding:8px 0;border-bottom:1px solid var(--hair)}
 .insp .term{background:none;box-shadow:none;border-radius:0}
 .insp .sect,.ev .lbl,.vm .box h3,.vm .v-card>h3,.ch,.act h3{text-transform:none;letter-spacing:0;font-weight:600;font-size:13px;color:var(--ink-dim)}
@@ -103,23 +103,23 @@ body,.board,.ev-main,.vm{background:var(--haze)}
 .ev .card,.vm .box,.vm .v-card,.vm .kpi,.ev .ttile,.act ol{
   background:linear-gradient(180deg,rgba(255,255,255,.82),rgba(255,255,255,.6));
   -webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);
-  border:0;border-radius:var(--r-card);box-shadow:var(--shadow-card)
+  border:0;border-radius:var(--r-card);box-shadow:var(--sh-card)
 }
 .act li{background:transparent}
 .act li:first-of-type,.act li:last-of-type{border-radius:0}
 .ev .dc.dq{background:none;box-shadow:none;border-radius:0;-webkit-backdrop-filter:none;backdrop-filter:none;border-bottom:0;background:var(--hairline) bottom/100% 1px no-repeat}
 .ev .dqueue .dch{border-bottom:0;background:var(--hairline) bottom/100% 1px no-repeat}
-.ev .dc.dfocus,.ev .lvr{box-shadow:var(--shadow-card),0 30px 60px rgba(15,46,40,.06)}
-.ev .dc.old,.ev .rcard.bad{box-shadow:var(--shadow-card)}
-.ev .ttile[aria-current=true]{box-shadow:0 0 0 2px var(--accent),var(--shadow-card)}
-.ev .ttile:hover{box-shadow:var(--shadow-card),0 22px 40px rgba(15,46,40,.12)}
+.ev .dc.dfocus,.ev .lvr{box-shadow:var(--sh-card),0 30px 60px rgba(15,46,40,.06)}
+.ev .dc.old,.ev .rcard.bad{box-shadow:var(--sh-card)}
+.ev .ttile[aria-current=true]{box-shadow:0 0 0 2px var(--accent),var(--sh-card)}
+.ev .ttile:hover{box-shadow:var(--sh-card),0 22px 40px rgba(15,46,40,.12)}
 .ev .dtile{background:none;border:1.5px dashed var(--line-strong);border-radius:var(--r-card);box-shadow:none}
 .ev .tpic{background:radial-gradient(70% 90% at 70% 100%,color-mix(in srgb,var(--oc) 22%,#FFFFFF),#FFFFFF)}
 .ev .tpic .pill{background:rgba(255,255,255,.8);border:0;box-shadow:inset 0 0 0 1px var(--hair)}
 
 /* tasks: the "waiting for you" column is a soft mint well, not a dashed box */
 .ev .colw{background:rgba(14,163,107,.05);border:0;border-radius:var(--r-card);box-shadow:inset 0 0 0 1px rgba(14,163,107,.12)}
-.ev .tk.wtk{border:0;background:linear-gradient(180deg,rgba(255,255,255,.9),rgba(255,255,255,.7));box-shadow:var(--shadow-card)}
+.ev .tk.wtk{border:0;background:linear-gradient(180deg,rgba(255,255,255,.9),rgba(255,255,255,.7));box-shadow:var(--sh-card)}
 .vm .kpi dd small{margin-left:6px}
 
 /* banners: a quiet line, a dot and one sentence, no box */

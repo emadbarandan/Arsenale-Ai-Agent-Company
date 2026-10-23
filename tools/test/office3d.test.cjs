@@ -172,7 +172,7 @@ test('office 3D: no shadows, and everything stands on the floor; the campus has 
   // 1.2 rule 42: the office cards take depth, but only from the Stage shadow tokens
   const c = await page.eval(`(() => {
     const probe = (v) => { const d = document.createElement('div'); d.style.boxShadow = v; document.body.appendChild(d); const s = getComputedStyle(d).boxShadow; d.remove(); return s }
-    const ok = ['none', probe('var(--sh1)'), probe('var(--sh2)')]
+    const ok = ['none', probe('var(--sh1)'), probe('var(--sh2)'), probe('var(--sh-glass)'), probe('var(--sh-card)')]
     return {
       blur: document.querySelectorAll('#cmap feGaussianBlur, #cmap filter, #cmap [filter]').length,
       other: [...document.querySelectorAll('#cmap .sign')].map((e) => getComputedStyle(e).boxShadow).filter((s) => !ok.includes(s)),

@@ -136,6 +136,7 @@ test('server: no framing, a nonce CSP on the pages, and the same headers on erro
     assert.ok(scripts.length >= 1)
     for (const s of scripts) assert.equal(s, '<script nonce="' + nonce + '">')
     assert.doesNotMatch(csp, /script-src[^;]*unsafe-inline/)
+    assert.match(csp, /(^|; )font-src data:(;|$)/, 'fonts only from data: (the inlined woff2 files)')
   }
   const a = await get(port, '/')
   const b = await get(port, '/')

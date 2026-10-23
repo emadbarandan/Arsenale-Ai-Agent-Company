@@ -86,7 +86,9 @@ const KEY_HELP = 'This dashboard opens only with its key. Run `arsenale open`, o
 // nowhere else on it (spec R-7.8). blob: is for the 3D office: the textures
 // inside a character file someone drops on a desk are read through blob URLs
 // the page makes itself (GLTFLoader), as images and by fetch.
-const csp = (nonce, port) => "default-src 'none'; script-src 'nonce-" + nonce + "'; style-src 'unsafe-inline'; img-src data: blob: http://localhost:" + port + "/deliverables/ http://127.0.0.1:" + port + "/deliverables/ http://localhost:" + port + "/mascot/ http://127.0.0.1:" + port + "/mascot/; connect-src 'self' blob:; base-uri 'none'; form-action 'none'; object-src 'none'; frame-ancestors 'none'"
+// Fonts: the Arsenale typefaces are woff2 files inlined in the page as data:
+// URIs (stage/identity.cjs), so fonts may come from data: and nowhere else.
+const csp = (nonce, port) => "default-src 'none'; script-src 'nonce-" + nonce + "'; style-src 'unsafe-inline'; font-src data:; img-src data: blob: http://localhost:" + port + "/deliverables/ http://127.0.0.1:" + port + "/deliverables/ http://localhost:" + port + "/mascot/ http://127.0.0.1:" + port + "/mascot/; connect-src 'self' blob:; base-uri 'none'; form-action 'none'; object-src 'none'; frame-ancestors 'none'"
 
 /** ?showcase=1 or 0 on a demo page; with neither, what the demo was started with. */
 const showcaseAsked = (full, dflt) => { const q = new URLSearchParams(String(full).split('?')[1] || ''); return q.has('showcase') ? q.get('showcase') === '1' : dflt }
