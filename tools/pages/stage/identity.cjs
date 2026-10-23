@@ -147,6 +147,16 @@ h1.brand .wm{display:flex;align-items:center}
 .sb-hatch{background:repeating-linear-gradient(-45deg,rgba(15,46,40,.3) 0 3px,transparent 3px 7px)}
 .ev .b.bad{border-color:transparent;color:var(--bad-ink)}
 .ev .kind{background:rgba(14,163,107,.08);color:var(--forest);border-color:transparent}
+/* the side drawer (a person, a task, hiring) and dialogs: glass sheets with green shadows */
+.ev .ev-drawer,.cdlg{background:linear-gradient(180deg,rgba(255,255,255,.94),rgba(248,252,250,.86));-webkit-backdrop-filter:blur(28px) saturate(1.9);backdrop-filter:blur(28px) saturate(1.9);border:0;box-shadow:inset 1px 0 0 rgba(14,163,107,.1),-18px 0 48px rgba(14,120,80,.12)}
+.cdlg{border-radius:22px;padding:20px 22px;box-shadow:inset 0 0 0 1px rgba(14,163,107,.1),0 24px 60px rgba(14,120,80,.18)}
+.cdlg-back{background:rgba(15,46,40,.16);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+/* the full-screen setup wizard sits on the same white with a soft green halo */
+.wiz-back{background:radial-gradient(55% 45% at 50% 28%,rgba(14,163,107,.11) 0%,transparent 70%),#FFFFFF}
+.ev .ev-drawer .stat,.ev .tiles .stat{background:rgba(255,255,255,.7);border:0;border-radius:14px;box-shadow:inset 0 0 0 1px var(--calm-line)}
+.ev input[type=text],.ev input[type=search],.ev input[type=number],.ev input:not([type]),.ev textarea,.ev select,.wz input[type=text],.wz textarea,.wz select,.cdlg input[type=text]{background:#FFFFFF;border:0;border-radius:12px;box-shadow:inset 0 0 0 1px var(--calm-line)}
+.ev input:focus,.ev textarea:focus,.ev select:focus,.wz input:focus,.wz textarea:focus{outline:2px solid var(--accent);outline-offset:1px}
+.ev input[type=checkbox],.wz input[type=checkbox],.ev input[type=radio]{accent-color:var(--forest)}
 .rail h2 .x{border:0;border-radius:999px;background:rgba(255,255,255,.8);box-shadow:inset 0 0 0 1px var(--calm-line);padding:3px 10px}
 .omenu button:hover{background:var(--idle-bg)}
 .ev .b.pri,.sign .more .cbtn.go{box-shadow:0 6px 16px rgba(15,46,40,.22)}
