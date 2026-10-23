@@ -192,11 +192,11 @@
     })
   }
   const screenMat = new T3.MeshBasicMaterial({ map: screenAtlas })
-  // the ground: the campus's light grid, one tile a metre, in two close tones
+  // the ground: a faint grid only, one tile a metre, on a clear canvas, so the page's white and
+  // its soft green halo show through (the renderer has alpha; no shadows fall on it)
   const groundTex = canvasTex(128, 128, (g) => {
-    g.fillStyle = '#DCE6DD'; g.fillRect(0, 0, 128, 128)
-    g.fillStyle = '#D8E3D9'; g.fillRect(0, 0, 64, 64); g.fillRect(64, 64, 64, 64)
-    g.strokeStyle = '#CFDCD0'; g.lineWidth = 2; g.strokeRect(1, 1, 126, 126); g.beginPath(); g.moveTo(64, 0); g.lineTo(64, 128); g.moveTo(0, 64); g.lineTo(128, 64); g.stroke()
+    g.clearRect(0, 0, 128, 128)
+    g.strokeStyle = 'rgba(15,46,40,.07)'; g.lineWidth = 2; g.strokeRect(1, 1, 126, 126); g.beginPath(); g.moveTo(64, 0); g.lineTo(64, 128); g.moveTo(0, 64); g.lineTo(128, 64); g.stroke()
   })
   groundTex.wrapS = groundTex.wrapT = T3.RepeatWrapping
   // words written on the floor or on a sign: Arial on a transparent canvas

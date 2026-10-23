@@ -60,7 +60,7 @@
     if (!co()) return head(T('Team')) + '<p class="empty">' + T('No team members yet. Install an office pack or hire someone.') + '</p><p><button type="button" class="b pri" data-ev="wiz-open">' + T('Set up your company') + '</button></p>'
     load('team', 'api/team')
     const d = st.data.team
-    if (!d) return '<p class="empty" style="padding:24px">' + T('Loading…') + '</p>'
+    if (!d) return '<p class="empty" style="padding:24px" role="status">' + T('Loading…') + '</p>'
     const people = d.members.filter((m) => m.kind !== 'ceo' && m.status !== 'retired')
     const offs = offices().concat(people.some((m) => !officeById(m.homeOfficeId || '')) ? [{ id: 'unassigned' }] : [])
     if (st.teamOffice && !offs.some((o) => o.id === st.teamOffice)) st.teamOffice = ''
@@ -144,7 +144,7 @@
   function profile() {
     const d = st.data.team
     const m = d && d.members.find((x) => x.id === st.drawer.id)
-    if (!m) return '<div class="pb"><p class="empty">' + T('Loading…') + '</p>' + msgHtml() + '</div>'
+    if (!m) return '<div class="pb"><p class="empty" role="status">' + T('Loading…') + '</p>' + msgHtml() + '</div>'
     const s = statusOf(m.id)
     const runs = monthRuns(m.id)
     const ms = runs.reduce((n, r) => n + (r.durMs || 0), 0), tok = runs.reduce((n, r) => n + (r.tokTotal || 0), 0)
@@ -182,7 +182,7 @@
   }
   function instrPart(m) {
     const mm = st.data.member
-    if (!mm || mm.id !== m.id) { load('member', 'api/member?id=' + encodeURIComponent(m.id), true); return '<p class="empty">' + T('Loading…') + '</p>' }
+    if (!mm || mm.id !== m.id) { load('member', 'api/member?id=' + encodeURIComponent(m.id), true); return '<p class="empty" role="status">' + T('Loading…') + '</p>' }
     let html = ''
     if (!mm.managed && mm.exists) html += '<p class="note">' + T('This file belongs to another tool (for example Claude Code). Editing it keeps a backup.') + '</p>'
     html += '<pre class="txt">' + esc(mm.body) + '</pre>'
@@ -333,7 +333,7 @@
         if (tx === undefined) {
           st.data['txt|' + d.id] = null
           fetch('deliverables/' + d.id, { cache: 'no-store' }).then((r) => r.text()).then((t) => { st.data['txt|' + d.id] = t; bump() }, () => { st.data['txt|' + d.id] = ''; bump() })
-          html += '<p class="empty">' + T('Loading…') + '</p>'
+          html += '<p class="empty" role="status">' + T('Loading…') + '</p>'
         } else if (tx !== null) {
           if (/csv/.test(d.mime)) html += csvTable(tx)
           else html += '<pre class="txt">' + esc(tx.split('\n').slice(0, 200).join('\n')) + '</pre>'
@@ -383,7 +383,7 @@
   function assistantsTab() {
     load('connect', 'api/connect', !!st.test, st.test ? 2000 : 5000)
     const d = st.data.connect
-    if (!d) return '<p class="empty">' + T('Loading…') + '</p>'
+    if (!d) return '<p class="empty" role="status">' + T('Loading…') + '</p>'
     let html = '<div><div class="sec">' + T('Your assistants') + ' <small>' + T('The AI chats that do the work') + '</small></div><div class="card rows" style="overflow:hidden">'
     for (const c of d.cards) {
       const seen = seenFor(c, d.clients)
@@ -445,7 +445,7 @@
   function safetyTab() {
     load('policy', 'api/policy')
     const d = st.data.policy
-    if (!d) return '<p class="empty">' + T('Loading…') + '</p>'
+    if (!d) return '<p class="empty" role="status">' + T('Loading…') + '</p>'
     let html = '<div><div class="sec">' + T('Safety rules') + ' <small>' + T('What your team must ask you before doing') + '</small></div>'
     if (d.policy.newer) html += '<p class="msg err">' + T('Safety rules written by a newer Arsenale: everything asks first, and editing is off.') + '</p>'
     const eff = {}
@@ -456,7 +456,7 @@
   function packsTab(inMarket) {
     load('packs', 'api/packs', false, 10000)
     const d = st.data.packs
-    if (!d) return '<p class="empty">' + T('Loading…') + '</p>'
+    if (!d) return '<p class="empty" role="status">' + T('Loading…') + '</p>'
     let html = '<div><div class="sec">' + T(inMarket ? 'Ready-made offices' : 'Marketplace') + ' <small>' + (inMarket ? T('Bundled with Arsenale') : T('Ready-made teams')) + '</small></div>'
     html += '<p class="soft" style="margin-bottom:14px">' + T('Adds the office and its team; removing keeps your changes.') + '</p>'
     if (!co()) html += '<p class="note" style="margin-bottom:12px">' + T('Set up your company first: the wizard installs the packs you choose.') + ' <button type="button" class="b sm pri" data-ev="wiz-open">' + T('Set up your company') + '</button></p>'

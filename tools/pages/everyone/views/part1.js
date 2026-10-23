@@ -326,7 +326,7 @@
   }
   function taskPage() {
     const t = st.data.task
-    if (!t || t.id !== st.page.id) { load('task', 'api/task?id=' + encodeURIComponent(st.page.id), true); return '<p class="empty">' + T('Loading…') + '</p>' }
+    if (!t || t.id !== st.page.id) { load('task', 'api/task?id=' + encodeURIComponent(st.page.id), true); return '<p class="empty" role="status">' + T('Loading…') + '</p>' }
     load('dlv', 'api/deliverables', false, 10000)
     const crumb = '<button type="button" data-ev="page-close">' + T('Tasks') + '</button> ' + ic('chev', 12) + ' <span dir="auto">' + esc(t.title.length > 70 ? t.title.slice(0, 68) + '…' : t.title) + '</span>'
     const act = canWrite() ? '<button type="button" class="b" data-ev="task-edit">' + ic('pencil', 15) + T('Edit') + '</button>' + (t.status !== 'done' ? '<button type="button" class="b" data-ev="task-done" data-arg="' + esc(t.id) + '">' + ic('check', 15) + T('Mark as done') + '</button>' : '<button type="button" class="b" data-ev="task-reopen" data-arg="' + esc(t.id) + '">' + T('Open again') + '</button>') : ''

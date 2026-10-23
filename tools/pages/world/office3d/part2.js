@@ -216,7 +216,7 @@
   selRing.visible = hovRing.visible = false; selRing.renderOrder = hovRing.renderOrder = 2
   scene.add(selRing, hovRing)
   // the ground every office stands on: wide enough that zooming out never shows its edge
-  const ground = new T3.Mesh(G.plane(), new T3.MeshStandardMaterial({ map: groundTex, roughness: 1 }))
+  const ground = new T3.Mesh(G.plane(), new T3.MeshBasicMaterial({ map: groundTex, transparent: true, depthWrite: false }))
   ground.scale.set(480, 1, 480); groundTex.repeat.set(240, 240); scene.add(ground)
   const TRAY_MAX = 14
   const trayPapers = new T3.InstancedMesh(G.box(0.3, 0.012, 0.4), mat('#ffffff'), TRAY_MAX)
