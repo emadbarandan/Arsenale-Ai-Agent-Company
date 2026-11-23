@@ -235,9 +235,10 @@ function mcpClient(sb, name, extraEnv) {
  *  this child. */
 async function startServer(sb, opts = {}) {
   // a random port can be in use already (on Linux the ports the system hands
-  // out for outgoing connections overlap these): another one is tried
+  // out for outgoing connections overlap these, and Windows reserves ranges
+  // that answer EACCES): another one is tried
   for (let n = 1; ; n++) {
-    try { return await startOnce(sb, opts) } catch (e) { if (n >= 4 || !/is taken/.test(e.message)) throw e }
+    try { return await startOnce(sb, opts) } catch (e) { if (n >= 4 || !/is taken|EACCES/.test(e.message)) throw e }
   }
 }
 function startOnce(sb, opts) {

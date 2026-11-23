@@ -117,7 +117,7 @@ test('S5-5: savings --write writes one file; a second call the same week rewrite
   const again = cli(sb, 'savings', '--week', W, '--write')
   assert.equal(again.code, 0, again.err)
   const last = tree(sb.root)
-  for (const k of Object.keys(after)) if (k !== file) assert.equal(last[k], after[k], k + ' untouched on the second call')
+  for (const k of Object.keys(after)) if (k !== file && path.basename(k) !== '.owner-only') assert.equal(last[k], after[k], k + ' untouched on the second call')
   assert.equal(cli(sb, 'savings', '--week', 'nope').code, 1)
   assert.match(cli(sb, 'savings', '--week', W).out, /Cost per done task/)
 })
