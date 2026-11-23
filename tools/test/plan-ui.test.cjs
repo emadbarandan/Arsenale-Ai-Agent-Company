@@ -10,6 +10,7 @@ const os = require('os')
 const path = require('path')
 const { makeSandbox, startServer, SEED } = require('./helpers.cjs')
 const browser = require('./browser.cjs')
+const NO_STD_SCROLLBAR = (root) => "[...document.querySelectorAll('" + root + " *')].filter((e) => { const s = getComputedStyle(e); return /auto|scroll/.test(s.overflowX + s.overflowY) && (s.scrollbarWidth === 'thin' || s.scrollbarColor !== 'auto') }).length"
 
 const SKIP = browser.unavailable()
 const SHOTS = process.env.PLAN_SHOTS || os.tmpdir()
@@ -68,7 +69,8 @@ async function check(page, name) {
     assert.equal(await noScroll(page), true, name + ': no sideways scroll at ' + w)
     assert.equal(await page.eval("[...document.querySelectorAll('#v-plan select')].filter((s) => { const r = s.getBoundingClientRect(); return getComputedStyle(s).display !== 'none' && r.width > 0 }).length"), 0, name + ': no native select visible at ' + w)
     // owner rule 4.4.1: the element that scrolls wears the glass scrollbar, never the native one with arrows
-    assert.equal(await page.eval("getComputedStyle(document.querySelector('#v-plan .plan')).scrollbarWidth"), 'thin', name + ': glass scrollbar on .plan at ' + w)
+    assert.equal(await page.eval("getComputedStyle(document.querySelector('#v-plan .plan')).scrollbarWidth"), 'auto', name + ': Chrome keeps ::-webkit-scrollbar (no standard scrollbar-width) on .plan at ' + w)
+    assert.equal(await page.eval(NO_STD_SCROLLBAR('#v-plan')), 0, name + ': no scroller sets scrollbar-width:thin at ' + w)
     out.push(label)
   }
   return out
