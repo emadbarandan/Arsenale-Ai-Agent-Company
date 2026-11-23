@@ -1,0 +1,31 @@
+#!/usr/bin/env node
+/* Arsenale pre-push guard. git calls it as `pre-push <remote-name> <remote-url>`
+ * and writes one line per ref on stdin: <local ref> <local sha> <remote ref> <remote sha>.
+ * The public GitHub repository is release-only: branches are refused there,
+ * tags named v* go through. Every other remote passes. Install: npm run setup-hooks */
+const PUBLIC = /github\.com(:\d+)?[:/]+emadbarandan\/arsenale(-ai-agent-company)?(\.git)?\/*$/i
+const MESSAGE = 'This is the public release repo. Push to the private dev remote; releases go out as owner tags.'
+
+function isPublic(url) { return PUBLIC.test(String(url || '').trim()) }
+const isReleaseTag = (ref) => /^refs\/tags\/v\d[^\s]*$/.test(ref)
+
+// returns 0 to allow, 1 to refuse (message on stderr)
+function check(url, stdin) {
+  if (!isPublic(url)) return { code: 0 }
+  const bad = String(stdin).split(/\r?\n/).map((l) => l.trim().split(/\s+/)).filter((p) => p.length >= 4 && p[0] !== '')
+    .filter(([local, , remote]) => !(isReleaseTag(remote) && local !== '(delete)'))
+  return bad.length ? { code: 1, message: MESSAGE, refs: bad.map((p) => p[2]) } : { code: 0 }
+}
+
+module.exports = { check, isPublic, MESSAGE }
+
+if (require.main === module) {
+  let data = ''
+  process.stdin.setEncoding('utf8')
+  process.stdin.on('data', (c) => { data += c })
+  process.stdin.on('end', () => {
+    const r = check(process.argv[3] || process.argv[2], data)
+    if (r.code) console.error(MESSAGE + '\n  refused: ' + r.refs.join(', '))
+    process.exit(r.code)
+  })
+}

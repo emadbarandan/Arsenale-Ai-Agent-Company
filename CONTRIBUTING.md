@@ -16,7 +16,7 @@ through a pull request that the maintainer reviews and merges.
    ```
    npm run test:all
    ```
-   It needs only Node.js 20 or newer. When several agents share one machine,
+   It needs only Node.js 22 or newer. When several agents share one machine,
    run the full suite through `arsenale testq run --run <id> -- npm run test:all`
    so only one suite runs at a time. `npm test` is the fast tier (no browser);
    `npm run test:ui` runs the page tests, at most two Chromes at once, when
@@ -30,6 +30,19 @@ through a pull request that the maintainer reviews and merges.
 
 For anything larger than a fix, open an issue first so we can agree on the
 shape before you build it.
+
+## Pre-push guard
+
+Run `npm run setup-hooks` once after cloning. It sets `core.hooksPath` to
+`tools/hooks`, so git runs the `pre-push` hook (plain Node.js, so it works the
+same on Windows, macOS and Linux). When the remote is the public release repo,
+`github.com/emadbarandan/Arsenale-Ai-Agent-Company`, the hook refuses every
+branch push and lets only `v*` tags through; those are pushed by the owner at
+release time. Pushes to any other remote pass.
+
+The hook needs `node` on PATH; without it the push fails (it fails closed). If
+`core.hooksPath` is already set, `setup-hooks` leaves it and warns; add
+`-- --force` to replace it.
 
 ## Rules the code keeps
 
