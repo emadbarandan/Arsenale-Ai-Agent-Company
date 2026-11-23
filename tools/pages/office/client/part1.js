@@ -237,7 +237,7 @@
   try {
     const saved = JSON.parse(sessionStorage.getItem('agent-office') || '{}')
     sel = saved.sel || null; drawerOpen = !!saved.drawer; filter = saved.filter || ''
-    if (['office', 'dec', 'use', 'campus', 'org', 'act', 'vr', 'live', 'tasks', 'appr', 'team', 'dlv', 'set', 'market'].includes(saved.mode)) mode = saved.mode
+    if (['office', 'dec', 'use', 'campus', 'org', 'act', 'vr', 'sav', 'plan', 'live', 'tasks', 'appr', 'team', 'dlv', 'set', 'market'].includes(saved.mode)) mode = saved.mode
     if (typeof saved.office === 'string') officeId = saved.office
     const v = saved.view
     if (v && [v.z, v.x, v.y].every((n) => typeof n === 'number' && isFinite(n))) view = { z: v.z, x: v.x, y: v.y }
@@ -258,13 +258,14 @@
   }) : null
   // Live replaced the Version run tab and Decisions the Approvals tab: the old addresses still open the new screens
   // (the first key of a screen is the one the address bar shows). #/decisions was already the older gates view.
-  const HASH = { campus: 'campus', org: 'org', decisions: 'dec', usage: 'use', office: 'office', activity: 'act', live: 'live', versionrun: 'live', rundetail: 'vr', tasks: 'tasks', inbox: 'appr', approvals: 'appr', team: 'team', deliverables: 'dlv', settings: 'set', marketplace: 'market' }
+  const HASH = { campus: 'campus', org: 'org', decisions: 'dec', usage: 'use', office: 'office', activity: 'act', live: 'live', versionrun: 'live', rundetail: 'vr', savings: 'sav', plan: 'plan', tasks: 'tasks', inbox: 'appr', approvals: 'appr', team: 'team', deliverables: 'dlv', settings: 'set', marketplace: 'market' }
   const AV = activityView({ esc, digits, hhmm, ms, T, cleanTask, redraw: () => renderAll() })
+  const SV = savingsView({ esc, T, live: () => LIVE, shown: () => mode === 'sav', post: (u, b) => CR.post(u, b), redraw: () => renderAll() })
   const VV = versionRunView({ esc, T, ms, live: () => LIVE, shown: () => mode === 'vr', answerBox: (g) => CR.answerBox(g), redraw: () => renderAll() })
   // the 1.0 screens (everyone-page.cjs): tasks, approvals, team, deliverables, settings, the wizard
   const EV = everyoneViews({ esc, digits, T, errTxt, k, health: (a, q) => runHealth(a, q), span: (v) => quietSpan(v), post: (u, b) => CR.post(u, b), redraw: () => redrawLater(), refresh: () => fetchCompany(true) })
   function fromHash() {
-    const m = /^#\/(campus|org|decisions|usage|office|activity|live|versionrun|rundetail|tasks|inbox|approvals|team|deliverables|settings|marketplace)(?:\/([\w-]+))?/.exec(location.hash || '')
+    const m = /^#\/(campus|org|decisions|usage|office|activity|live|versionrun|rundetail|savings|plan|tasks|inbox|approvals|team|deliverables|settings|marketplace)(?:\/([\w-]+))?/.exec(location.hash || '')
     if (!m) return false
     mode = HASH[m[1]]
     if (m[2]) officeId = m[2]

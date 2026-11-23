@@ -57,7 +57,7 @@ function withLive(data, liveRuns) {
 }
 
 const VR_STYLE = `
-.vr{overflow:auto;scrollbar-width:thin;scrollbar-color:#C9D1D9 transparent;flex:1;min-height:0;display:grid;gap:14px;align-content:start;padding-bottom:20px}
+.vr{overflow:auto;flex:1;min-height:0;display:grid;gap:14px;align-content:start;padding-bottom:20px}@supports not selector(::-webkit-scrollbar){.vr{scrollbar-width:thin;scrollbar-color:#C9D1D9 transparent}}
 .vr .v-card{background:var(--panel);border:1px solid var(--line);border-radius:3px;min-width:0}
 .vr .v-card>h3{margin:0;padding:7px 12px;font:700 11px var(--font-ui);text-transform:uppercase;letter-spacing:.6px;color:var(--ink-dim);border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:10px}
 .vr h1{font-size:16px;margin:0}

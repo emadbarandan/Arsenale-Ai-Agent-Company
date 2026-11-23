@@ -25,6 +25,10 @@ const GLASS_STYLE = `
   --hairline:linear-gradient(90deg,transparent,var(--hair) 14%,var(--hair) 86%,transparent);
   --track:#E3EDE7;
   --r-card:22px;--r-sheet:22px;--r-menu:18px;
+  /* listbox, menu and scrollbar tokens (spec 1.4 section 4.4): the glass listbox of stage/listbox.cjs and the Plan panels */
+  --lb-bg:rgba(255,255,255,.72);--lb-bg-hi:#FFFFFF;--lb-rim:inset 0 0 0 1px var(--hair),0 1px 2px rgba(15,46,40,.06);
+  --lb-pop-shadow:var(--glass-hi),0 18px 44px rgba(14,120,80,.2),0 2px 8px rgba(14,120,80,.08);
+  --lb-opt-on:rgba(14,163,107,.12);--lb-thumb:rgba(15,46,40,.22);
 }
 
 /* ---------- the haze behind every screen */
@@ -162,6 +166,16 @@ body,.board,.ev-main,.vm{background:var(--haze)}
 
 /* focus stays visible on glass */
 .ev .b:focus-visible,.seg button:focus-visible,.f:focus-visible,.slip:focus-visible,.czoom button:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+
+/* the glass listbox popup, and a thin glass scrollbar for panels that scroll inside the Plan screens */
+.lb-pop.glass{background:var(--glass-solid)}
+/* Chrome 121+ ignores every ::-webkit-scrollbar rule once scrollbar-width or scrollbar-color is set, so the
+   standard properties are only for browsers without ::-webkit-scrollbar (Firefox). Every scroller gets the glass bar. */
+*::-webkit-scrollbar{width:8px;height:8px}
+*::-webkit-scrollbar-thumb{background:var(--lb-thumb);border-radius:8px}
+*::-webkit-scrollbar-track,*::-webkit-scrollbar-corner{background:transparent}
+*::-webkit-scrollbar-button{display:none;width:0;height:0}
+@supports not selector(::-webkit-scrollbar){.plan,.plan *{scrollbar-width:thin;scrollbar-color:var(--lb-thumb) transparent}}
 
 /* solid fallbacks: no blur support, or the person asked for less transparency */
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){

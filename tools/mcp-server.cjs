@@ -56,6 +56,7 @@ function refusedLine() {
 
 const INSTRUCTIONS = `Arsenale is the owner's dashboard for the work you do. Use it like this:
 - At the start of every conversation call hello, then get_inbox: it holds the tasks and changes the owner made on the dashboard.
+- Call get_context for the project before reading the repository.
 - Before a distinct piece of work call start_job (the team member, the task); call log_step for each real step; end with finish_job and a plain one-line summary of what was done, in the user's language.
 - When the owner may be away, use ask_you instead of asking in the chat, then read the answer with get_answers.
 - Before anything that leaves this computer (sending a message, posting, paying, deleting, sharing, changing an account) call check_action and follow its verdict: allow = go ahead; ask = wait for the answer; never = do not do it.
@@ -117,15 +118,17 @@ const S = (props, required) => ({ type: 'object', properties: props, required: r
 const T = (type, description, extra) => Object.assign({ type, description }, extra || {})
 const TOOLS = [
   { name: 'hello', description: 'Say hello to Arsenale at the start of a conversation. Returns the company, its offices, unread counts and the house rules digest.', inputSchema: S({ client: T('string', 'Your name, optional'), note: T('string', 'Optional note') }) },
-  { name: 'start_job', description: 'Start a job before a distinct piece of work. Returns job_id and the budget verdict.', inputSchema: S({ team_member: T('string', 'Team member id doing the work (e.g. copywriter), or "supervisor" for yourself'), task: T('string', 'What the job is, one line'), project: T('string', 'Project name, optional'), office_id: T('string', 'Office id, optional'), kind: T('string', 'Kind of work, optional: ' + require('./kinds.cjs').KINDS.map((k) => k.id).join(', ') + ' (an unknown one is ignored)'), task_id: T('string', 'Arsenale task id this job works on, e.g. BLU-4'), parent_job_id: T('string', 'The job that started this one, optional'), model: T('string', 'Model name, optional') }, ['team_member', 'task']) },
+  { name: 'start_job', description: 'Start a job before a distinct piece of work. Returns job_id and the budget verdict.', inputSchema: S({ team_member: T('string', 'Team member id doing the work (e.g. copywriter), or "supervisor" for yourself'), task: T('string', 'What the job is, one line'), project: T('string', 'Project name, optional'), office_id: T('string', 'Office id, optional'), kind: T('string', 'Kind of work, optional: ' + require('./kinds.cjs').KINDS.map((k) => k.id).join(', ') + ' (an unknown one is ignored)'), task_id: T('string', 'Arsenale task id this job works on, e.g. BLU-4'), parent_job_id: T('string', 'The job that started this one, optional'), model: T('string', 'Model name, optional'), tier: T('string', 'light | standard | heavy, optional', { enum: ['light', 'standard', 'heavy'] }) }, ['team_member', 'task']) },
   { name: 'log_step', description: 'Log one real step of a job, in a short line in the user\'s language.', inputSchema: S({ job_id: T('string', 'From start_job'), doing: T('string', 'What you are doing now'), pct: T('number', 'Optional, 0-100: the whole job, or the current step once a plan is given'), plan: T('array', 'Optional, once: the steps, [{name, weight}]', { items: { type: 'object' } }), step: T('string', 'Optional: the step of the plan being done, its name or 1-based number'), files: T('number', 'Optional: how many files you changed so far'), tests: T('object', 'Optional: {run, of} tests run of those planned') }, ['job_id', 'doing']) },
-  { name: 'finish_job', description: 'Finish a job with a plain one-line summary of what was done.', inputSchema: S({ job_id: T('string', 'From start_job'), status: T('string', 'ok | findings | failed | stopped', { enum: ['ok', 'findings', 'failed', 'stopped'] }), summary: T('string', 'What was done, one plain sentence'), what_was_done: T('array', 'Up to 10 short items', { items: { type: 'string' } }), findings: T('array', 'Up to 20 findings', { items: { type: 'string' } }), deliverable_ids: T('array', 'Ids from add_deliverable', { items: { type: 'string' } }), usage: T('object', '{tokens, input_tokens, output_tokens, duration_ms, model, estimated}') }, ['job_id', 'status', 'summary']) },
+  { name: 'finish_job', description: 'Finish a job with a plain one-line summary of what was done.', inputSchema: S({ job_id: T('string', 'From start_job'), status: T('string', 'ok | findings | failed | stopped', { enum: ['ok', 'findings', 'failed', 'stopped'] }), summary: T('string', 'What was done, one plain sentence'), what_was_done: T('array', 'Up to 10 short items', { items: { type: 'string' } }), findings: T('array', 'Up to 20 findings', { items: { type: 'string' } }), deliverable_ids: T('array', 'Ids from add_deliverable', { items: { type: 'string' } }), usage: T('object', '{tokens, input_tokens, output_tokens, cache_read_tokens, cache_write_tokens, cache_write_5m_tokens, cache_write_1h_tokens, duration_ms, model, provider, estimated}') }, ['job_id', 'status', 'summary']) },
   { name: 'ask_you', description: 'Ask the owner on the dashboard (use when they may be away). kind: question (free answer), choice (2-8 choices), approval (yes/no). Read the answer later with get_answers.', inputSchema: S({ question: T('string', 'The question'), kind: T('string', 'question | choice | approval', { enum: ['question', 'choice', 'approval'] }), choices: T('array', '2 to 8 choices for kind choice', { items: { type: 'string' } }), project: T('string', 'optional'), job_id: T('string', 'optional'), task_id: T('string', 'optional') }, ['question', 'kind']) },
   { name: 'get_answers', description: 'Answers the owner gave to questions you asked, since your last read.', inputSchema: S({ question_ids: T('array', 'Only these questions (also ones asked before you connected)', { items: { type: 'string' } }), peek: T('boolean', 'Do not mark them read') }) },
   { name: 'get_inbox', description: 'New tasks, comments and changes the owner made on the dashboard since your last read.', inputSchema: S({ peek: T('boolean', 'Do not mark them read') }) },
   { name: 'list_tasks', description: 'List tasks (summaries).', inputSchema: S({ status: T('array', 'Filter: todo, in_progress, waiting_for_you, blocked, done, cancelled, backlog', { items: { type: 'string' } }), office_id: T('string', 'optional'), assignee: T('string', 'team member id, optional'), limit: T('number', 'at most 50') }) },
+  { name: 'get_context', description: 'A short brief of one project (open tasks, open decisions, last runs, house rules), at most 1,500 tokens. Read it before reading the repository. Read-only.', inputSchema: S({ project: T('string', 'Project id or key; optional when the company has one project') }) },
+  { name: 'next_task', description: 'The next task the owner approved in the work queue, with the project\'s context pack (at most 2,000 tokens in all). Starts nothing: use start_job with its task_id. Set claim true to claim it (moves the task to in_progress). An empty queue says so; a task the owner did not approve is never returned.', inputSchema: S({ project: T('string', 'Project id, optional'), claim: T('boolean', 'Claim the task, optional') }) },
   { name: 'get_task', description: 'One task with its comments and links.', inputSchema: S({ task_id: T('string', 'e.g. BLU-4') }, ['task_id']) },
-  { name: 'create_task', description: 'Create a task, for example to split work. The owner sees it on the dashboard.', inputSchema: S({ title: T('string', '1-200 characters'), description: T('string', 'optional'), assignee: T('string', 'team member id, optional'), office_id: T('string', 'optional'), kind: T('string', 'optional kind of work (see start_job); with no office_id the task goes to the office that holds it'), parent_id: T('string', 'optional parent task id') }, ['title']) },
+  { name: 'create_task', description: 'Create a task, for example to split work. The owner sees it on the dashboard.', inputSchema: S({ title: T('string', '1-200 characters'), description: T('string', 'optional'), assignee: T('string', 'team member id, optional'), office_id: T('string', 'optional'), kind: T('string', 'optional kind of work (see start_job); with no office_id the task goes to the office that holds it'), parent_id: T('string', 'optional parent task id'), type: T('string', 'optional: feature, bug or chore'), size: T('string', 'optional: S, M or L'), tier: T('string', 'optional: light, standard or heavy'), token_estimate: T('number', 'optional whole number of tokens, 0 or more'), acceptance: T('string', 'optional acceptance text, at most 2000 characters') }, ['title']) },
   { name: 'update_task', description: 'Move a task (in_progress, waiting_for_you, blocked, done) and/or comment on it. A task that needs the owner\'s sign-off cannot be set done: set waiting_for_you.', inputSchema: S({ task_id: T('string', 'e.g. BLU-4'), status: T('string', 'in_progress | waiting_for_you | blocked | done', { enum: ['in_progress', 'waiting_for_you', 'blocked', 'done'] }), comment: T('string', 'optional'), job_id: T('string', 'optional: link this job') }, ['task_id']) },
   { name: 'add_comment', description: 'Comment on a task.', inputSchema: S({ task_id: T('string', 'e.g. BLU-4'), text: T('string', 'at most 4000 characters'), job_id: T('string', 'optional') }, ['task_id', 'text']) },
   { name: 'add_deliverable', description: 'Register something the team produced: a link (url), a file (path, copied only from the owner\'s deliverable folders) or content (text, or a base64 image with mime).', inputSchema: S({ title: T('string', 'at most 120 characters'), kind: T('string', 'document | image | link | file | text', { enum: ['document', 'image', 'link', 'file', 'text'] }), url: T('string', 'http(s) link'), path: T('string', 'absolute file path'), content: T('string', 'text, or base64 for an image'), mime: T('string', 'for content: text/markdown, text/plain, text/csv, image/png, image/jpeg, image/gif, image/webp'), job_id: T('string', 'optional'), task_id: T('string', 'optional'), team_member: T('string', 'optional'), note: T('string', 'optional') }, ['title', 'kind']) },
@@ -135,6 +138,7 @@ const TOOLS = [
   { name: 'get_office', description: 'Read-only: an office (name, colour, building, kinds of work), or for a team member their home office and where their next job would go, and why. Only the owner changes offices, on the dashboard.', inputSchema: S({ team_member: T('string', 'team member id, optional'), office_id: T('string', 'office id, optional'), project: T('string', 'optional, with team_member'), kind: T('string', 'optional, with team_member') }) },
   { name: 'list_team', description: 'The team: id, title, office, strength, one line, and the safety rules summary.', inputSchema: S({ office_id: T('string', 'optional') }) },
   { name: 'get_team_member', description: 'A team member\'s role brief to follow for a task, with their safety rules.', inputSchema: S({ team_member: T('string', 'team member id') }, ['team_member']) },
+  { name: 'propose_plan', description: 'Propose a plan change to the owner: plan_into (put a task into a version), bug (add a bug), queue (add a task to the work queue). Only a proposal is written; the owner accepts or declines on the dashboard. Duplicates return the existing proposal; at most 50 wait per project. Read the decision with get_answers.', inputSchema: S({ kind: T('string', 'plan_into | bug | queue', { enum: ['plan_into', 'bug', 'queue'] }), task_id: T('string', 'plan_into and queue: the task'), target_version: T('string', 'plan_into: the version, for example 2.1.1; bug: optional'), phase: T('string', 'plan_into: optional phase id'), title: T('string', 'bug: the title'), description: T('string', 'bug: details, optional'), project: T('string', 'bug: the project id'), why: T('string', 'why, one or two sentences'), evidence: T('string', 'optional: a run id or file') }, ['kind', 'why']) },
   { name: 'propose_hire', description: 'Propose a new team member when a role is missing. The owner approves it on the dashboard; nothing is created before that.', inputSchema: S({ name: T('string', 'display name'), title: T('string', 'job title'), office_id: T('string', 'office id'), instructions: T('string', 'plain-language instructions, at most 8000 characters'), description: T('string', 'one line, 10-300 characters'), tier: T('string', 'light | standard | heavy'), reports_to: T('string', 'optional'), why: T('string', 'why this role is needed') }, ['name', 'title', 'office_id', 'instructions', 'why']) },
 ]
 const TOOL_NAMES = new Set(TOOLS.map((t) => t.name))
@@ -193,12 +197,17 @@ function createSession(opts) {
       }
       return ok('Hello from Arsenale' + (data.company ? ' (' + data.company + ')' : '') + '. Unread: ' + data.unread.inbox + ' inbox, ' + answers + ' answers; ' + tasks + ' open tasks.' + (co.configured ? '' : ' No company is set up yet: the owner can set it up on the dashboard.'), data)
     },
+    next_task(a) {
+      const Q = require('./queue.cjs')
+      const r = Q.next({ project: a.project ? str(a.project, 60) : undefined, claim: a.claim === true }, actor())
+      return ok(Q.nextText(r), r)
+    },
     start_job(a) {
       const member = str(a.team_member, 60)
       if (!member) return err('team_member is required')
       const open = (() => { try { return fs.readdirSync(P.ACTIVE).map((n) => readJson(path.join(P.ACTIVE, n), null)).filter((r) => r && r.clientId === s.clientId).length } catch { return 0 } })()
       if (open >= MAX_ACTIVE_PER_CLIENT) return err('You have ' + open + ' jobs open already. Finish some with finish_job before starting more.')
-      const r = L.startRun({ agent: member, task: str(a.task, 200), project: str(a.project, 80), officeId: a.office_id ? str(a.office_id, 40) : undefined, kind: a.kind ? str(a.kind, 20) : undefined, issue: a.task_id ? str(a.task_id, 20) : undefined, parent: a.parent_job_id ? str(a.parent_job_id, 80) : undefined, model: str(a.model, 60) }, actor())
+      const r = L.startRun({ agent: member, task: str(a.task, 200), project: str(a.project, 80), officeId: a.office_id ? str(a.office_id, 40) : undefined, kind: a.kind ? str(a.kind, 20) : undefined, issue: a.task_id ? str(a.task_id, 20) : undefined, parent: a.parent_job_id ? str(a.parent_job_id, 80) : undefined, model: str(a.model, 60), tier: a.tier ? str(a.tier, 20) : undefined }, actor())
       const verdict = r.budget ? r.budget.level : 'ok'
       return ok('Job started: ' + r.id + '. Budget: ' + verdict + (r.warnings.length ? ' (' + r.warnings[0].replace(/^WARNING: /, '') + ')' : ''), { job_id: r.id, budget: verdict, budget_line: r.budget ? r.budget.lines.join('; ') : 'ok' })
     },
@@ -215,7 +224,7 @@ function createSession(opts) {
       if (!run) return err('No job is active with that id. Start one with start_job.')
       const status = ['ok', 'findings', 'failed', 'stopped'].includes(a.status) ? a.status : 'ok'
       const u = a.usage && typeof a.usage === 'object' ? a.usage : null
-      const usage = u ? { tokens: Number(u.tokens) || (Number(u.input_tokens) || 0) + (Number(u.output_tokens) || 0), inputTokens: u.input_tokens, outputTokens: u.output_tokens, durationMs: Number(u.duration_ms) || 0, model: str(u.model, 60), estimated: u.estimated === true } : undefined
+      const usage = u ? { tokens: Number(u.tokens) || (Number(u.input_tokens) || 0) + (Number(u.output_tokens) || 0), inputTokens: u.input_tokens, outputTokens: u.output_tokens, cacheReadTokens: u.cache_read_tokens, cacheWriteTokens: u.cache_write_tokens, cacheWrite5mTokens: u.cache_write_5m_tokens, cacheWrite1hTokens: u.cache_write_1h_tokens, provider: u.provider, durationMs: Number(u.duration_ms) || 0, model: str(u.model, 60), estimated: u.estimated === true } : undefined
       const r = L.finishRun({
         id, agent: run.agent, task: run.task, project: run.project, status, summary: str(a.summary, 300),
         findings: Array.isArray(a.findings) ? a.findings.slice(0, 20).map((f) => str(f, 300)) : [],
@@ -234,7 +243,7 @@ function createSession(opts) {
         choices = (Array.isArray(a.choices) ? a.choices : []).map((c) => str(c, 60)).filter(Boolean)
         if (choices.length < 2 || choices.length > 8) return err('A choice question needs 2 to 8 choices')
       }
-      const waiting = (() => { try { return fs.readdirSync(P.GATES).map((n) => readJson(path.join(P.GATES, n), null)).filter((g) => g && g.status === 'waiting' && g.clientId === s.clientId).length } catch { return 0 } })()
+      const waiting = (() => { try { return fs.readdirSync(P.GATES).map((n) => readJson(path.join(P.GATES, n), null)).filter((g) => g && g.status === 'waiting' && g.approvalType !== 'proposal' && g.clientId === s.clientId).length } catch { return 0 } })()
       if (waiting >= MAX_WAITING_PER_CLIENT) return err('You have ' + waiting + ' questions waiting already. Wait for the owner to answer some before asking more.')
       const g = L.gate({ question, kind: kinds[a.kind], choices, project: str(a.project, 80), run: a.job_id ? str(a.job_id, 80) : undefined, taskId: a.task_id ? str(a.task_id, 20) : undefined }, actor())
       try { require('./notify.cjs').onQuestion(g) } catch { /* phone channels are optional */ }
@@ -273,13 +282,18 @@ function createSession(opts) {
       if (!list.length) return ok('No tasks.', { tasks: [] })
       return ok(list.map((t) => t.id + ' [' + t.status + '] ' + t.title + (t.assigneeAgentId ? ' → ' + t.assigneeAgentId : '') + (t.dueDate ? ' (due ' + t.dueDate + ')' : '')).join('\n'), { tasks: list })
     },
+    get_context(a) {
+      let r
+      try { r = require('./context-pack.cjs').read(a.project ? str(a.project, 60) : '') } catch (e) { return err(e.message) }
+      return ok(r.markdown, { project_id: r.projectId, tokens: r.tokens, signature: r.signature, markdown: r.markdown })
+    },
     get_task(a) {
       const t = require('./tasks.cjs').getTask(str(a.task_id, 20), { seenBy: s.clientId })
-      const view = { id: t.id, title: t.title, description: t.description, status: t.status === 'in_review' ? 'waiting_for_you' : t.status, assignee: t.assigneeAgentId || t.assigneeUserId || '', office_id: t.assigneeOfficeId || '', due: t.dueDate || '', needs_sign_off: !!t.needsSignOff, links: t.links || [], jobs: t.runIds || [], comments: t.comments.map((c) => ({ by: c.by, at: c.at, text: c.text })) }
+      const view = { id: t.id, title: t.title, description: t.description, status: t.status === 'in_review' ? 'waiting_for_you' : t.status, assignee: t.assigneeAgentId || t.assigneeUserId || '', office_id: t.assigneeOfficeId || '', due: t.dueDate || '', type: t.type || '', size: t.size || '', tier: t.tier || '', target_version: t.targetVersion || '', token_estimate: t.tokenEstimate === undefined ? null : t.tokenEstimate, acceptance: t.acceptance || '', needs_sign_off: !!t.needsSignOff, links: t.links || [], jobs: t.runIds || [], comments: t.comments.map((c) => ({ by: c.by, at: c.at, text: c.text })) }
       return ok(t.id + ': ' + t.title + ' [' + view.status + ']' + (t.description ? '\n' + t.description : '') + (view.comments.length ? '\nComments:\n' + view.comments.map((c) => c.by + ': ' + c.text).join('\n') : ''), view)
     },
     create_task(a) {
-      const t = require('./tasks.cjs').createTask({ title: a.title, description: a.description, assignee: a.assignee, assigneeOfficeId: a.office_id, kind: a.kind, parentId: a.parent_id }, actor())
+      const t = require('./tasks.cjs').createTask({ title: a.title, description: a.description, assignee: a.assignee, assigneeOfficeId: a.office_id, kind: a.kind, parentId: a.parent_id, type: a.type, size: a.size, tier: a.tier, tokenEstimate: a.token_estimate, acceptance: a.acceptance }, actor())
       return ok('Task created: ' + t.id, { task_id: t.id })
     },
     update_task(a) {
@@ -345,6 +359,12 @@ function createSession(opts) {
       const eff = require('./policy.cjs').effective(id)
       const rules = Object.entries(eff).map(([k, v]) => k + ': ' + (v.value === 'allow' ? 'allowed' : v.value === 'ask' ? 'ask the owner first (check_action)' : 'never')).join('\n')
       return ok('Role brief for ' + id + ':\n\n' + body + '\n\nSafety rules for ' + id + ':\n' + rules, { team_member: id, brief: body, policy: Object.fromEntries(Object.entries(eff).map(([k, v]) => [k, v.value])), house_rules: INSTRUCTIONS })
+    },
+    propose_plan(a) {
+      try {
+        const r = require('./proposals.cjs').create({ kind: str(a.kind, 20), task_id: str(a.task_id, 20), target_version: str(a.target_version, 20), phase: str(a.phase, 20), title: str(a.title, 300), description: str(a.description, 2000), project: str(a.project, 80), why: str(a.why, 400), evidence: str(a.evidence, 200) }, actor())
+        return ok((r.existing ? 'This is already proposed: question ' : 'Proposed to the owner: question ') + r.question_id + '. Nothing changes until the owner accepts. Read the decision with get_answers.', r)
+      } catch (e) { return err(e.message) }
     },
     propose_hire(a) {
       const r = require('./team.cjs').propose(a, actor())
@@ -438,6 +458,7 @@ function createSession(opts) {
             if (run) out.push(L.activeFileFor(run.id), ...Tk.lockFilesOf(run.issue))
             break
           }
+          case 'next_task': { try { const q = require('./queue.cjs').read().entries[0]; if (q && a.claim === true) out.push(...Tk.lockFilesOf(q.taskId)) } catch { /* the call answers */ } break }
           case 'start_job': case 'get_task': case 'update_task': out.push(...Tk.lockFilesOf(str(a.task_id, 20))); break
           case 'get_inbox': {
             // the tasks get_inbox marks seen: those of the unread lines

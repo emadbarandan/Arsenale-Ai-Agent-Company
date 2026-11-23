@@ -58,7 +58,7 @@ const http = require('http')
 const fs = require('fs')
 const crypto = require('crypto')
 
-const PARTS = ['./build-agent-dashboard.cjs', './agent-office-page.cjs', './dashboard-strings.cjs', './agent-company.cjs', './agent-company-page.cjs', './activity-page.cjs', './version-run-page.cjs', './everyone-page.cjs', './everyone-art.cjs', './office-world.cjs', './paths.cjs'].map((f) => require.resolve(f))
+const PARTS = ['./build-agent-dashboard.cjs', './agent-office-page.cjs', './dashboard-strings.cjs', './agent-company.cjs', './agent-company-page.cjs', './activity-page.cjs', './version-run-page.cjs', './savings.cjs', './everyone-page.cjs', './everyone-art.cjs', './office-world.cjs', './paths.cjs'].map((f) => require.resolve(f))
 let stamp = ''
 let page = null
 function pages() {
@@ -185,6 +185,10 @@ function start(opts = {}) {
   // Board writes of the 1.0 screens: url -> [handler(body), body limit]
   const WRITES = {
     '/api/task': [(b) => { const T = require('./tasks.cjs'); return b.op === 'update' ? S.withLockAsync(T.lockFilesOf(b.id), () => T.updateTask(b, BOARD).task) : T.createTask(b, BOARD) }, 32768],
+    '/api/plan': [(b) => { const Pl = require('./plan.cjs'); return S.withLockAsync(b.op === 'into' ? require('./tasks.cjs').lockFilesOf(b.task) : [Pl.fileOf(String(b.project || ''))].filter((f) => fs.existsSync(f)), () => b.op === 'into' ? Pl.into({ task: b.task, version: b.version, phase: b.phase, nextPatch: b.nextPatch === true }, BOARD) : Pl.apply(b, BOARD)) }, 32768],
+    '/api/proposal-decision': [(b) => { const gf = require('path').join(require('./paths.cjs').GATES, String(b.gate || '').replace(/[^\w.-]/g, '') + '.json'); return S.withLockAsync(fs.existsSync(gf) ? [gf] : [], () => require('./proposals.cjs').decide(String(b.gate || ''), b.decision === 'decline' ? 'decline' : 'accept', b.edits, BOARD)) }, 32768],
+    '/api/queue': [(b) => require('./queue.cjs').apply(b, BOARD), 32768],
+    '/api/release-notes': [(b) => require('./release-notes.cjs').writeDraft(String(b.project || ''), String(b.version || ''), BOARD)],
     '/api/task-comment': [(b) => require('./tasks.cjs').addComment(String(b.id || ''), b.text, BOARD)],
     '/api/team-member': [(b) => S.withLockAsync(companyFiles('employees'), () => {
       const Tm = require('./team.cjs')
@@ -207,6 +211,10 @@ function start(opts = {}) {
     '/api/connect-apply': [(b) => require('./connect.cjs').apply(String(b.client || ''), String(b.hash || ''), BOARD)],
     '/api/mcp-forget': [(b) => require('./mcp-server.cjs').forgetClient(String(b.id || ''), BOARD)],
     '/api/notify': [(b) => require('./notify.cjs').configure(b, BOARD)],
+    // spec 1.3: the owner's one click to fill the price file with list prices
+    '/api/prices-init': [(b) => { const r = require('./prices.cjs').init({ force: b.force === true, merge: b.merge === true }, BOARD); return { added: r.added, source: r.source } }],
+    // spec 1.3 section 5.4: the owner marks a tier suggestion adopted (board only)
+    '/api/savings-adopt': [(b) => require('./savings.cjs').adopt(b, BOARD)],
     '/api/campus': [(b) => require('./campus.cjs').apply(b, BOARD, 'dashboard')],
     // spec 1.2: New office, Edit office, Archive (campus.cjs office, the owner only)
     '/api/office': [(b) => require('./campus.cjs').office(b, BOARD, 'dashboard')],
@@ -223,6 +231,13 @@ function start(opts = {}) {
   const READS = {
     // the percent comes from the same place as the Live page (watch.live -> progress.overallPercent): the mirror file has no percent of its own
     '/api/version-runs': () => require('./version-run-page.cjs').withLive(require('./version-run-page.cjs').load(), require('./watch.cjs').live({ state: pages().snapshot().state }).versionRuns),
+    '/api/ledger': (q) => require('./ledger.cjs').ledger(pages().snapshot().state, { by: q.get('by') || undefined, since: q.get('since') || undefined, until: q.get('until') || undefined, tasks: require('./tasks.cjs').listTasks() }),
+    '/api/savings': (q) => require('./savings.cjs').forState(pages().snapshot().state, { week: q.get('week') || undefined }),
+    '/api/context': (q) => { const r = require('./context-pack.cjs').read(q.get('project') || '', { state: pages().snapshot().state, company: pages().snapshot().company() }); return r },
+    '/api/plan': (q) => q.get('shadow') === '1' ? (require('./plan-migrate.cjs').shadowView(q.get('project') || '_') || (() => { throw require('./runlog.cjs').fail(404, 'There is no shadow for this project') })()) : require('./plan.cjs').view(q.get('project') || '_', require('./tasks.cjs').listTasks()),
+    '/api/today': () => { const st = pages().snapshot(); return require('./plan.cjs').today({ state: st.state }) },
+    '/api/queue': () => require('./queue.cjs').read(),
+    '/api/release-notes': (q) => require('./release-notes.cjs').draft(q.get('project') || '', q.get('version') || ''),
     '/api/tasks': () => ({ tasks: require('./tasks.cjs').listTasks() }),
     '/api/task': (q) => require('./tasks.cjs').getTask(q.get('id')),
     '/api/team': () => {
@@ -290,6 +305,13 @@ function start(opts = {}) {
           // A hire proposal approved from the rail must hire, not just record
           // "approve": the same call as the Approvals screen's buttons.
           const hire = (() => { try { const g = JSON.parse(fs.readFileSync(require('path').join(require('./paths.cjs').GATES, id.replace(/[^\w.-]/g, '') + '.json'), 'utf8')); return g.approvalType === 'hire' && g.status === 'waiting' } catch { return false } })()
+          // a proposal approved from anywhere applies, as the Proposals tab's Accept does
+          const prop = (() => { try { const g = JSON.parse(fs.readFileSync(require('path').join(require('./paths.cjs').GATES, id.replace(/[^\w.-]/g, '') + '.json'), 'utf8')); return g.approvalType === 'proposal' && g.status === 'waiting' } catch { return false } })()
+          if (prop && url === '/api/answer') {
+            // the same gate lock as /api/proposal-decision: two clicks at once apply once
+            const pgf = require('path').join(require('./paths.cjs').GATES, id.replace(/[^\w.-]/g, '') + '.json')
+            return S.withLockAsync([pgf], () => require('./proposals.cjs').decide(id, String(body.answer) === 'approve' ? 'accept' : 'decline', null, BOARD).gate)
+          }
           if (hire && url === '/api/answer') return require('./team.cjs').decideProposal(id, String(body.answer) === 'approve' ? 'hire' : 'decline', null, BOARD).gate
           // the gate's lock, waited for with timers (answerGate takes it again inside)
           const gateFile = require('path').join(require('./paths.cjs').GATES, id.replace(/[^\w.-]/g, '') + '.json')
@@ -405,6 +427,11 @@ function start(opts = {}) {
       try { require('./policy.cjs').ensureDefaults('dashboard') } catch { /* read-only folder: every category reads as ask anyway */ }
       // a writer killed between its temp file and the rename left the temp behind
       try { const Pt = require('./paths.cjs'); require('./store.cjs').cleanStray([Pt.RUNS, Pt.ACTIVE, Pt.GATES, Pt.DECISIONS, Pt.VERSION_RUNS, Pt.COMPANY, require('path').join(Pt.HOME, 'alerts'), require('path').join(Pt.HOME, 'test-queue'), require('path').join(Pt.HOME, 'test-queue', 'waiting'), require('path').join(Pt.HOME, 'resume'), require('path').join(Pt.HOME, 'settings'), require('path').join(Pt.COMPANY, 'issues')]) } catch { /* nothing to clean */ }
+      // spec 1.3 section 5.3: last week's report, once per ISO week, from a timer (never from a GET)
+      const weekly = () => { try { require('./savings.cjs').weeklyOnce(pages().snapshot().state) } catch { /* the report is optional */ } }
+      const weeklyFirst = setTimeout(weekly, 5000); const weeklyTick = setInterval(weekly, 6 * 3600 * 1000)
+      weeklyFirst.unref(); weeklyTick.unref()
+      server.on('close', () => { clearTimeout(weeklyFirst); clearInterval(weeklyTick) })
       // a pack review closed without Install, or cut off by a restart
       try { require('./pack-local.cjs').cleanStaging() } catch { /* nothing staged */ }
       const url = 'http://localhost:' + port + '/'

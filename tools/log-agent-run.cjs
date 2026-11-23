@@ -57,7 +57,12 @@ Runs
   --progress <id> "<step>" [<pct>]   the same for fixed text without quotes
   [--finish] <json>   finish: {"id","agent","task","status": ok|findings|
                       failed|stopped, optional "summary","findings":[...],"files":[...],
-                      "usage":{"tokens","toolUses","durationMs","model"},"transcript"}
+                      "usage":{"tokens","toolUses","durationMs","model",
+                      optional whole-number meters "inputTokens","outputTokens","cacheReadTokens",
+                      "cacheWriteTokens" (or "cacheWrite5mTokens","cacheWrite1hTokens"),
+                      "provider","estimated"},"transcript", optional "strategy","taskId"
+                      (alias of "issue"), "provider"}. A bad meter is dropped with a warning.
+                      "tier" and "strategy" given at --start are kept on the finished run
                       prints the path of the run record
 
 Autonomous version runs (the state file in the repo is the source; this is its mirror)
@@ -123,7 +128,9 @@ Offices
 
 Tasks, deliverables and the safety rules
   --task <json>       create: {"title", optional "description","assignee","officeId",
-                      "parentId"}: prints the new task id. Update: {"id","status":
+                      "parentId","type": feature|bug|chore,"size": S|M|L,
+                      "tier": light|standard|heavy,"tokenEstimate","acceptance"}: prints the new
+                      task id. ("targetVersion" is the owner's, set on the dashboard). Update: {"id","status":
                       in_progress|in_review|blocked|done, optional "assignee"}: prints ok
   --comment <json>    {"task","text"}: a comment on a task
   --deliverable <json>  {"title","kind": document|image|link|file|text, and one of
@@ -488,6 +495,7 @@ if (mode === '--start') {
 
 let done
 try { done = L.finishRun(input, actor) } catch (e) { die(e) }
+for (const w of done.warnings || []) console.error(w)
 refresh()
 // a threshold this run crossed is logged once, for the company, its office and its employee
 try {

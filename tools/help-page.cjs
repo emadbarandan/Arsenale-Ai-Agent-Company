@@ -7,7 +7,7 @@ const path = require('path')
 const SRC = path.join(__dirname, '..', 'docs', 'guide', 'src', 'guide.html')
 const IMG = path.join(__dirname, '..', 'docs')
 const VERSION = require('../package.json').version
-const { mark, FAVICON } = require('./pages/stage/brand.cjs')
+const { dsMark, DS_FAVICON } = require('./pages/stage/identity.cjs')
 
 const TOC = [['start', 'Start'], ['campus', 'Campus'], ['office', 'Office'], ['live', 'Live'], ['decisions', 'Decisions'], ['team', 'Team'], ['tasks', 'Tasks'], ['finished', 'Finished work'], ['activity', 'Activity'], ['versionrun', 'Version run'], ['gatehistory', 'Gate history'], ['settings', 'Settings'], ['phone', 'Phone notifications'], ['safety', 'Safety'], ['queue', 'The test queue'], ['resume', 'After a restart']]
 
@@ -34,9 +34,9 @@ function render(mode, opts) {
   const toc = pdf ? '' : '<nav class="toc" aria-label="Sections">' + TOC.map((t) => '<a href="#' + t[0] + '">' + t[1] + '</a>').join('') + '</nav>'
   const base = o.imgBase || (pdf ? '../../' : '/help/img/')
   const body = fs.readFileSync(SRC, 'utf8').replace(/@img\//g, base)
-  return '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Arsenale Help</title><link rel="icon" href="' + FAVICON + '"><style>' + CSS + (pdf ? PDF_CSS : '') +
+  return '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Arsenale Help</title><link rel="icon" href="' + DS_FAVICON + '"><style>' + CSS + (pdf ? PDF_CSS : '') +
     '</style></head><body><main>' +
-    (pdf ? '<div class="cover"><h1>' + mark(64) + 'Arsenale</h1><p class="sub">User guide, version ' + VERSION + '</p></div><div class="pg"></div>' : '<h1>' + mark(36) + 'Arsenale Help</h1><p class="sub">Version ' + VERSION + '</p>') +
+    (pdf ? '<div class="cover"><h1>' + dsMark(64) + 'Arsenale</h1><p class="sub">User guide, version ' + VERSION + '</p></div><div class="pg"></div>' : '<h1>' + dsMark(36) + 'Arsenale Help</h1><p class="sub">Version ' + VERSION + '</p>') +
     toc + body + '</main></body></html>'
 }
 

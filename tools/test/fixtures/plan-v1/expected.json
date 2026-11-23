@@ -1,0 +1,19 @@
+{
+  "ok": true,
+  "progress": {
+    "phases": [
+      {"id": "P1", "doneWeight": 11, "totalWeight": 13, "percent": 85},
+      {"id": "P2", "doneWeight": 0, "totalWeight": 12, "percent": 0}
+    ],
+    "overall": {"tasks": 7, "doneWeight": 11, "totalWeight": 25, "percent": 44}
+  },
+  "runs": {
+    "count": 3,
+    "usage": {"input": 4500, "output": 2250, "cache_read": 2000, "cache_write": 100},
+    "wallSeconds": 465,
+    "pricedRuns": 2,
+    "unpricedRuns": 1,
+    "costUsd": 1.75,
+    "usdStatus": "partial"
+  }
+}

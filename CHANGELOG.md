@@ -3,6 +3,28 @@
 All notable changes are listed here. Versions follow
 [Semantic Versioning](https://semver.org).
 
+## 1.4.0 (2026-11-23)
+
+- **The hexagon logo everywhere.** The arched-gate mark is gone from the README, the reference, the help page and `docs/brand/`, which now holds the hexagon icon and logo (light and on dark), the favicons and the social preview. The screenshots were taken again.
+- **The Plan screen (the Dock).** A roadmap per project (Now, Next, Later), each version split into phases, with tasks planned into a version. Progress is the done weight over the total weight, and "No plan" when nothing is planned. Cost comes from the 1.3 ledger and reads "not recorded" or "n/a" rather than $0.00. Tabs: Roadmap, Version (a ship view on wide screens, a table on narrow ones), Today, Queue and Proposals. Every list is a glass list, the scrollbars are glass too, and nothing needs sideways scrolling from 390 px wide.
+- **`arsenale plan`, `import-plan` and `export-plan`.** Read a schema v1 plan file into a project and write one out again. Two sides that both changed an item are resolved by a three-way rule that never overwrites silently, and the conflicts are listed. An import never deletes: an item that is missing from the new file is flagged "Gone from the import file?" and the owner chooses **Keep** or **Cancel task** on the Plan screen. An import is all or nothing, and it writes one summary line to the supervisor's inbox, not one per task.
+- **Today and the work queue.** The owner approves tasks into an ordered queue. `arsenale next` gives the supervisor the first unclaimed task with its project brief; `--claim` takes it, and two supervisors never get the same task. Nothing starts by itself.
+- **Bugs and proposals.** "Plan into" puts a bug into a version in two clicks, with a "Next patch" choice. Agents and the supervisor can only propose (a version for a task, a bug, a queue entry). The owner accepts, edits or declines in the Proposals tray. Proposals are not counted as questions waiting for you.
+- **Release notes draft.** `arsenale release-notes <version> --project <id> [--write]` drafts notes from a version's done tasks. The release manager reads the saved draft first.
+- **Moving a project from another planner.** `plan-parity` compares the other planner's export with Arsenale. `import-plan --shadow` keeps a read-only copy that the Plan screen can show; `--promote` makes a backup, imports, checks parity and undoes itself on a difference. `plan restore <backup>` puts the backup back, and refuses to undo work done since unless you add `--force`. `shadow drop` removes one shadow copy.
+- **The project brief** (`arsenale context`) now starts with a "Now" line: the active version with its title, progress and phase, and the head of the queue.
+- **Safer names.** A project id is checked everywhere it becomes a file name. Names such as `..`, `.` or anything with a slash are refused, and `shadow drop` only removes a folder that holds `shadow.json`.
+- **Older versions.** No file format changed. 1.3 opens a 1.4 data folder and keeps the new fields when it writes.
+
+## 1.3.0 (2026-11-23, released together with 1.4.0)
+
+- **A ledger of cost.** Every finished run carries four token meters (input, output, cache read, cache write), its provider and model, and its tier. Cost is shown per run, task, version and office. Where a price is missing the page says "n/a", never 0.
+- **Your prices.** A price file you edit, with shipped list prices that name their source and date. `arsenale prices` takes them with one command.
+- **Savings.** A page and a weekly local report: what you spent first, then suggestions, each marked "est." with its method. Writing work is never suggested for a cheaper model.
+- **Project briefs.** `arsenale context` and the MCP tool `get_context` give agents a short brief of a project, at most 1,500 tokens, to read first.
+- **Plan fields on tasks.** A task can carry a type, a size, a tier, a target version, a token estimate and acceptance text, and a schema v1 checker (`arsenale plan-check`) tells you whether a plan file written elsewhere is valid.
+- **Older versions.** No file format changed. 1.2 opens 1.3 data and keeps the new fields.
+
 ## 1.2.2 (2026-11-23)
 
 - **A guard against pushing to the public repository.** `npm run setup-hooks` installs a git pre-push hook. It refuses any branch push to the public release repository and lets `v*` tags through. Pushes to any other remote are not touched.

@@ -323,7 +323,7 @@
     }
     document.querySelectorAll('[data-view]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.view === mode)))
     // the narrow layout names the screen in the bar (the tabs are at the foot there)
-    const SCREEN = { campus: T('Campus'), office: T('Office'), live: T('Live'), appr: T('Decisions'), team: T('Team'), tasks: T('Tasks'), dlv: T('Finished work'), act: T('Activity'), org: T('Org chart'), dec: T('Gate history'), use: T('Tools & usage'), set: T('Settings'), market: T('Marketplace'), vr: T('Version run') }
+    const SCREEN = { campus: T('Campus'), office: T('Office'), live: T('Live'), appr: T('Decisions'), team: T('Team'), plan: T('Plan'), tasks: T('Tasks'), dlv: T('Finished work'), act: T('Activity'), org: T('Org chart'), dec: T('Gate history'), use: T('Tools & usage'), set: T('Settings'), market: T('Marketplace'), vr: T('Version run'), sav: T('Savings') }
     const scrn = $('scrn')
     if (scrn) scrn.textContent = mode === 'office' && CO && CO.officeById(officeId) ? CO.oname(CO.officeById(officeId)) : SCREEN[mode] || ''
     if (CO) {
@@ -332,7 +332,7 @@
       if (tab) { tab.textContent = T('Office'); tab.title = o ? CO.oname(o) : '' }
       const legacy = $('omenu-legacy')
       if (legacy) {
-        const MORE = { tasks: T('Tasks'), dlv: T('Finished work'), act: T('Activity'), dec: T('Gate history'), use: T('Tools & usage'), org: T('Org chart'), market: T('Marketplace'), set: T('Settings') }
+        const MORE = { office: T('Office'), tasks: T('Tasks'), dlv: T('Finished work'), act: T('Activity'), dec: T('Gate history'), use: T('Tools & usage'), sav: T('Savings'), org: T('Org chart'), market: T('Marketplace'), set: T('Settings') }
         legacy.textContent = (MORE[mode] || T('More')) + ' ▾'
         legacy.setAttribute('aria-pressed', String(!!MORE[mode]))
       }
@@ -344,7 +344,7 @@
           menu.style.top = (r.bottom + 4) + 'px'
           menu.style.left = Math.max(8, (r.right - 220)) + 'px'
           menu.innerHTML = omenuOpen === 'legacy'
-            ? '<button type="button" data-view="tasks" aria-current="' + (mode === 'tasks') + '">' + T('Tasks') + '</button><button type="button" data-view="dlv" aria-current="' + (mode === 'dlv') + '">' + T('Finished work') + '</button><button type="button" data-view="act" aria-current="' + (mode === 'act') + '">' + T('Activity') + '</button><button type="button" data-view="org" aria-current="' + (mode === 'org') + '">' + T('Org chart') + '</button><button type="button" data-view="dec" aria-current="' + (mode === 'dec') + '">' + T('Gate history') + '</button><button type="button" data-view="use" aria-current="' + (mode === 'use') + '">' + T('Details: tools & usage') + '</button><button type="button" data-view="market" aria-current="' + (mode === 'market') + '">' + T('Marketplace') + '</button><button type="button" data-view="set" aria-current="' + (mode === 'set') + '">' + T('Settings') + '</button>'
+            ? '<button type="button" data-view="office" aria-current="' + (mode === 'office') + '">' + T('Office') + '</button><button type="button" data-view="tasks" aria-current="' + (mode === 'tasks') + '">' + T('Tasks') + '</button><button type="button" data-view="dlv" aria-current="' + (mode === 'dlv') + '">' + T('Finished work') + '</button><button type="button" data-view="act" aria-current="' + (mode === 'act') + '">' + T('Activity') + '</button><button type="button" data-view="org" aria-current="' + (mode === 'org') + '">' + T('Org chart') + '</button><button type="button" data-view="dec" aria-current="' + (mode === 'dec') + '">' + T('Gate history') + '</button><button type="button" data-view="use" aria-current="' + (mode === 'use') + '">' + T('Details: tools & usage') + '</button><button type="button" data-view="sav" aria-current="' + (mode === 'sav') + '">' + T('Savings') + '</button><button type="button" data-view="market" aria-current="' + (mode === 'market') + '">' + T('Marketplace') + '</button><button type="button" data-view="set" aria-current="' + (mode === 'set') + '">' + T('Settings') + '</button>'
             : CO.officeList().filter((x) => !x.builtIn || CO.counts(S_FULL, x.id).today || CO.counts(S_FULL, x.id).working).map((x) => '<button type="button" data-goto="office:' + esc(x.id) + '" aria-current="' + (x.id === officeId) + '"><span class="sq" style="background:' + esc(x.color) + '"></span>' + esc(CO.oname(x)) + '</button>').join('')
         }
       }

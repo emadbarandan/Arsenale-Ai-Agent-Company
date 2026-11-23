@@ -159,7 +159,7 @@ ul.finds{margin:6px 0 0;padding:0 16px 0 0;font-size:12.5px;color:var(--ink-soft
 /* the strip's cards: a wrapping grid anchored to the top, not a one-row rail.
    Height comes from the drawer's --dh via flex:1, so dragging the splitter
    taller reveals more rows instead of leaving empty space beneath one row. */
-.slips{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-wrap:wrap;align-content:flex-start;gap:8px;flex:1;min-height:0;overflow-x:hidden;overflow-y:auto;scrollbar-width:thin}
+.slips{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-wrap:wrap;align-content:flex-start;gap:8px;flex:1;min-height:0;overflow-x:hidden;overflow-y:auto}@supports not selector(::-webkit-scrollbar){.slips{scrollbar-width:thin}}
 .slip{flex:none;width:176px;text-align:start;background:var(--panel-raised);border:1px solid var(--line);border-top:3px solid var(--idle);border-radius:3px;padding:5px 8px;color:var(--ink);font:12px/1.45 var(--font-ui);cursor:pointer;display:block}
 .slip.g-ok{border-top-color:var(--ok)}.slip.g-findings{border-top-color:var(--warn)}.slip.g-failed{border-top-color:var(--bad)}
 .slip.on{outline:2px solid var(--accent);outline-offset:-1px}
@@ -259,7 +259,7 @@ const CR_STYLE = `
 .mono{font-family:var(--font-ui)}
 
 /* the rail: what waits for the user, oldest first */
-.rail{position:absolute;right:0;top:52px;bottom:0;width:320px;background:var(--panel);border-left:1px solid var(--line);padding:12px 14px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#C9D1D9 transparent;z-index:9}
+.rail{position:absolute;right:0;top:52px;bottom:0;width:320px;background:var(--panel);border-left:1px solid var(--line);padding:12px 14px;overflow-y:auto;z-index:9}@supports not selector(::-webkit-scrollbar){.rail{scrollbar-width:thin;scrollbar-color:#C9D1D9 transparent}}
 .rail h2{font-size:14px;margin:0 0 2px;color:var(--gate);display:flex;gap:8px;align-items:baseline}
 .rail h2 b{font:700 16px var(--font-ui)}
 .rail h2 .x{margin-inline-start:auto;font:12px var(--font-ui);color:var(--ink-soft);background:var(--panel-raised);border:1px solid var(--line);border-radius:3px;padding:1px 8px;cursor:pointer;display:none}
@@ -362,7 +362,7 @@ const CR_STYLE = `
 .runs-ax i{position:absolute;height:6px;top:2px;background:#C9D1D9;border-radius:1px}
 .runs-ax i.op{background:var(--heavy)}
 .runs-ax i.lv{background:var(--accent)}
-.tbl-wrap{flex:1;min-height:0;overflow:auto;border:1px solid var(--line);border-radius:4px;background:var(--panel);scrollbar-width:thin;scrollbar-color:#C9D1D9 transparent}
+.tbl-wrap{flex:1;min-height:0;overflow:auto;border:1px solid var(--line);border-radius:4px;background:var(--panel)}@supports not selector(::-webkit-scrollbar){.tbl-wrap{scrollbar-width:thin;scrollbar-color:#C9D1D9 transparent}}
 .vm table{border-collapse:collapse;width:100%}
 .dt th,.dt td{text-align:start;padding:6px 10px;border-bottom:1px solid #E6EAEE;vertical-align:top;font-size:12.5px}
 .dt thead th{font-size:11px;color:var(--ink-dim);font-weight:700;background:#F1F4F7;position:sticky;top:0;z-index:1}
@@ -394,7 +394,7 @@ const CR_STYLE = `
 .kpi.m dd{color:var(--measured)}
 .kpi dd.unset{font:700 13px var(--font-ui);color:var(--gate);padding-top:5px}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;flex:none;max-height:46%;min-height:0}
-.box{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:10px 12px;min-height:0;overflow:auto;scrollbar-width:thin;scrollbar-color:#C9D1D9 transparent}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:10px 12px;min-height:0;overflow:auto}@supports not selector(::-webkit-scrollbar){.box{scrollbar-width:thin;scrollbar-color:#C9D1D9 transparent}}
 .box h3{font-size:13px;margin:0 0 6px;display:flex;justify-content:space-between;align-items:baseline;gap:8px}
 .box h3 span{font:400 11px var(--font-ui);color:var(--ink-dim)}
 .hb th{font:700 11.5px var(--font-ui);text-align:left;direction:ltr;width:160px;padding:2px 0;color:var(--ink);white-space:nowrap}

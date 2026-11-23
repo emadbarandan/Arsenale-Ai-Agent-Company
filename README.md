@@ -1,4 +1,4 @@
-# <img src="docs/brand/arsenale-mark.svg" width="44" height="44" alt=""> Arsenale
+# <picture><source media="(prefers-color-scheme: dark)" srcset="docs/brand/arsenale-logo-on-dark.svg"><img src="docs/brand/arsenale-logo.svg" height="44" alt="Arsenale"></picture>
 
 **Hire agents. Watch them work. Stay in charge.**
 
@@ -103,6 +103,30 @@ To remove it: `install.ps1 -Uninstall` or `./install.sh --uninstall`.
 Open **Settings, Assistants** on the dashboard. Each tool has a card with the
 exact command and a Test button. The adapters are in [adapters/](adapters/).
 
+## What is new in 1.4 and 1.3 (not released yet)
+
+1.4 "Plan":
+- **A Plan screen.** A roadmap per project with versions, phases, tasks,
+  decisions and progress. Plan work with a few clicks; only you change a plan.
+- **Import and export.** Read a plan file made in another tool and write one
+  back. Nothing is ever deleted by an import: items that went missing wait for
+  your Keep or Cancel.
+- **Today and a work queue.** You approve tasks into an ordered queue, and
+  `arsenale next` hands the first one to the supervisor. Nothing starts by
+  itself.
+- **Proposals.** Agents propose; you accept, edit or decline.
+- **Release notes draft** from a version's done tasks.
+- **Moving a project** from another planner with a shadow copy, a parity
+  check, a backup and an undo ([guide](docs/guide/plan-migration.md)).
+
+1.3 "Ledger":
+- **Cost you can trust.** Four token meters per run and a price file you
+  control; a missing price shows "n/a", never 0.
+- **Savings** with a weekly local report, and **project briefs** for agents
+  (`arsenale context`).
+
+The full list is in the [changelog](CHANGELOG.md).
+
 ## What is new in 1.2
 
 - **A new look.** One light theme with a tinted ground, white cards and larger
@@ -115,8 +139,8 @@ exact command and a Test button. The adapters are in [adapters/](adapters/).
   `.zip`; Arsenale checks that it holds only text and shows you all of it first.
 - **Lighter labels.** In an office, only people who work, wait or need a look
   get a label.
-- **A logo.** The arched gate, in the header and the favicon. Logo files, a
-  profile picture and a reel cover are in `docs/brand/`.
+- **A logo.** The hexagon logo, in the header and the favicon. The logo files
+  and favicons are in `docs/brand/`.
 - **For recordings.** A narrow layout for 9:16 video, and
   `arsenale demo --showcase`, which hides the legends and notes.
 
@@ -149,4 +173,4 @@ characters by Kay Lousberg, under CC0 1.0. The fallback character is made by a
 script in this repo and is also CC0. Sources, hashes and changes are in
 [tools/characters/LICENCES.md](tools/characters/LICENCES.md).
 
-Version 1.2.2. It ships with 25 agents and 17 office packs.
+Version 1.4.0. It ships with 25 agents and 17 office packs.

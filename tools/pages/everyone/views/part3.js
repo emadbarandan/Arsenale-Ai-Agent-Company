@@ -399,11 +399,13 @@
       const pick = [...el].find((x) => x.name === 'who' && x.checked)
       const who = pick ? String(pick.value) : ''
       const body = { title: el.title.value, description: el.description.value, dueDate: el.dueDate.value, links: linksOf(el), needsSignOff: el.needsSignOff.checked }
+      for (const k of ['type', 'size', 'tier', 'targetVersion', 'acceptance']) if (el[k].value) body[k] = el[k].value
+      if (el.tokenEstimate.value !== '') body.tokenEstimate = Number(el.tokenEstimate.value)
       if (who.indexOf('office:') === 0) body.assigneeOfficeId = who.slice(7); else if (who) body.assignee = who
       act(() => send('api/task', body), (b) => { openTask(b.result.id); st.data.task = null; load('tasks', 'api/tasks', true) })
     } else if (a === 'task-edit') {
       const who = String(el.who.value || '')
-      const body = { op: 'update', id: f.dataset.id, title: el.title.value, description: el.description.value, dueDate: el.dueDate.value, status: el.status.value, needsSignOff: el.needsSignOff.checked }
+      const body = { op: 'update', id: f.dataset.id, title: el.title.value, description: el.description.value, dueDate: el.dueDate.value, status: el.status.value, needsSignOff: el.needsSignOff.checked, type: el.type.value, size: el.size.value, tier: el.tier.value, targetVersion: el.targetVersion.value, acceptance: el.acceptance.value, tokenEstimate: el.tokenEstimate.value === '' ? null : Number(el.tokenEstimate.value) }
       if (who.indexOf('office:') === 0) body.assigneeOfficeId = who.slice(7); else body.assignee = who
       act(() => send('api/task', body), () => { st.editTask = false; load('task', 'api/task?id=' + encodeURIComponent(f.dataset.id), true); load('tasks', 'api/tasks', true) })
     } else if (a === 'task-comment') {

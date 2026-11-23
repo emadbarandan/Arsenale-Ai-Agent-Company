@@ -1,6 +1,6 @@
 {
   "name": "arsenale",
-  "version": "1.2.2",
+  "version": "1.4.0",
   "description": "Hire agents. Watch them work. Stay in charge. A local dashboard and run log for any coding agent.",
   "license": "MIT",
   "author": "Emad Barandan",
@@ -19,6 +19,7 @@
     "tools/*.cjs",
     "tools/pages/",
     "tools/model-prices.json",
+    "tools/price-defaults.json",
     "tools/OFFICE-WORLD-NOTE.md",
     "tools/vendor/",
     "tools/characters/",

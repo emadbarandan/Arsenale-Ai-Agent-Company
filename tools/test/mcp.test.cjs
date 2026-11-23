@@ -33,7 +33,7 @@ test('conformance: initialize negotiates the version, lists tools with schemas, 
   assert.equal(other.result.protocolVersion, '2025-11-25')
   const list = await c.rpc('tools/list', {})
   const names = list.result.tools.map((x) => x.name)
-  for (const n of ['hello', 'start_job', 'log_step', 'finish_job', 'ask_you', 'get_answers', 'get_inbox', 'list_tasks', 'get_task', 'update_task', 'add_comment', 'add_deliverable', 'record_decision', 'check_action', 'check_budget', 'list_team', 'get_team_member', 'propose_hire']) assert.ok(names.includes(n), n)
+  for (const n of ['hello', 'start_job', 'log_step', 'finish_job', 'ask_you', 'get_answers', 'get_inbox', 'list_tasks', 'get_task', 'get_context', 'next_task', 'update_task', 'add_comment', 'add_deliverable', 'record_decision', 'check_action', 'check_budget', 'list_team', 'get_team_member', 'propose_hire', 'propose_plan']) assert.ok(names.includes(n), n)
   for (const tool of list.result.tools) { assert.equal(tool.inputSchema.type, 'object', tool.name); assert.ok(tool.description.length > 10) }
   // nothing that answers, approves, budgets or hires is a tool
   assert.ok(!names.some((n) => /answer_|approve|decline|dismiss|budget_set|set_budget|pause|install|policy/.test(n)))

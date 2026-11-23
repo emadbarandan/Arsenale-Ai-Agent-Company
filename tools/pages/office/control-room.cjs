@@ -178,15 +178,20 @@ function controlRoom(h) {
     if (m < 1) return T('under a minute')
     return m < 60 ? digits(m) + T(' min') : digits(Math.floor(m / 60)) + T(' h') + (m % 60 ? ' ' + digits(m % 60) + T(' min') : '')
   }
+  // proposals wait in their own tray (spec 1.4 section 8): a chip beside "Waiting for you", not counted in it
+  const proposalChip = () => {
+    const n = (DATA.proposals || []).filter((g) => g && g.status === 'waiting').length
+    return n ? '<button type="button" class="dprop" data-pl-proptab="1" title="' + T('Open the Proposals tab') + '">' + T('Proposals') + ' ' + digits(n) + '</button>' : ''
+  }
   function dock(S, many) {
     const w = shown()
-    if (!w.length) return ''
+    if (!w.length) return proposalChip() ? '<div class="dh"><span class="sp"></span>' + proposalChip() + '</div>' : ''
     const rows = w.slice(0, 3).map((g) => {
       const [kind, icon] = plainKind(g), late = ageOf(g, S.now) > LATE_MS
       return '<button type="button" class="drow' + (late ? ' late' : '') + '" data-railopen="' + esc(g.id) + '" title="' + T('Answer it here') + '">' + ic(icon, 20, 2) +
         '<span class="dk">' + esc(T(kind) + (g.project ? ' · ' + g.project : '')) + '</span><span class="dq" dir="auto">' + esc(g.question || g.label || '') + '</span><span class="da">' + waitWords(ageOf(g, S.now)) + '</span></button>'
     }).join('')
-    return '<div class="dh"><button type="button" class="dtl" data-railopen="1">' + T('Waiting for you') + ' <b class="cnt">' + digits(w.length) + '</b></button>' + (many || '') + '<span class="sp"></span><button type="button" class="dlink" data-view="appr">' + T('Open Decisions →') + '</button></div>' + rows +
+    return '<div class="dh"><button type="button" class="dtl" data-railopen="1">' + T('Waiting for you') + ' <b class="cnt">' + digits(w.length) + '</b></button>' + (many || '') + proposalChip() + '<span class="sp"></span><button type="button" class="dlink" data-view="appr">' + T('Open Decisions →') + '</button></div>' + rows +
       (w.length > 3 ? '<button type="button" class="dmore" data-railopen="1">' + digits(w.length - 3) + T(' more, oldest first') + '</button>' : '')
   }
 
@@ -456,6 +461,14 @@ function controlRoom(h) {
     let html = '<dl class="kv"><div><dt>' + T('Tokens') + (r.live ? T(' so far') : '') + '</dt><dd style="color:var(--measured)">' + (r.tokSrc ? k(r.tokTotal) + (r.tokSrc === 'reported' ? '≈' : '') : '<span class="nrec">' + T('not recorded') + '</span>') + '</dd></div>' +
       '<div><dt>' + T('Tools') + '</dt><dd style="color:var(--measured)">' + (r.toolTotal ? digits(r.toolTotal) : '<span class="nrec">' + T('not recorded') + '</span>') + '</dd></div>' +
       '<div><dt>' + T('Cost') + '</dt><dd>' + (typeof r.costUsd === 'number' ? usd(r.costUsd) : '<span class="nrec">' + (t && !(DATA.prices && DATA.prices.set) ? T('no price') : '—') + '</span>') + '</dd></div></dl>'
+    const mt = r.meters
+    if (mt) {
+      const cs = r.cacheShare
+      html += '<dl class="kv"><div><dt>' + T('Input') + '</dt><dd dir="ltr">' + k(mt.input) + '</dd></div><div><dt>' + T('Output') + '</dt><dd dir="ltr">' + k(mt.output) + '</dd></div>' +
+        '<div><dt>' + T('Cache read') + '</dt><dd dir="ltr">' + k(mt.cacheRead) + '</dd></div><div><dt>' + T('Cache write') + '</dt><dd dir="ltr">' + k(mt.cacheWrite5m + mt.cacheWrite1h) + '</dd></div>' +
+        '<div><dt>' + T('Cache-read share') + '</dt><dd dir="ltr">' + (cs == null ? '—' : Math.round(cs * 100) + '%') + '</dd></div>' +
+        '<div><dt>' + T('Cost source') + '</dt><dd>' + (r.costSrc ? esc(r.costSrc) + (r.meterSrc === 'estimated' ? T(' (est.)') : '') : '<span class="nrec">' + T('not recorded') + '</span>') + '</dd></div></dl>'
+    }
     if (!t) {
       const why = r.transcript && r.transcript.reason === 'missing' ? T('The transcript file is no longer there.') : r.live ? T('This run transcript has not been found yet.') : T('This run transcript was not recorded.')
       return html + '<p class="muted" style="margin:4px 0 0">' + T('Tools and files: ') + why + '</p>'

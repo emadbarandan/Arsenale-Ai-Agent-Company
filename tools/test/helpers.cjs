@@ -94,6 +94,7 @@ function makeSandbox(opts = {}) {
   linkTree(path.join(TOOLS, 'pages'), path.join(tools, 'pages'))
   // the 3D pages' pinned three.js and the characters (office-world.cjs); opts.flat leaves them out
   if (!opts.flat) for (const d of ['vendor', 'characters']) if (fs.existsSync(path.join(TOOLS, d))) linkTree(path.join(TOOLS, d), path.join(tools, d))
+  try { fs.copyFileSync(path.join(TOOLS, 'price-defaults.json'), path.join(tools, 'price-defaults.json')) } catch { /* no defaults file */ }
   fs.writeFileSync(path.join(root, 'model-prices.json'), JSON.stringify({ models: opts.prices || {} }))
   // the user's own settings never leak in: no agent or transcript folders from the environment
   const env = Object.assign({}, process.env, { ARSENALE_HOME: root }, opts.env || {})

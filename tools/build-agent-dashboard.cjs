@@ -211,8 +211,11 @@ function readTranscript(file, freshMs) {
   const models = {}
   for (const u of usage.values()) {
     const mk = modelKey(u.model) || '?'
-    const t = models[mk] || (models[mk] = { input: 0, output: 0, cacheRead: 0, cacheWrite5m: 0, cacheWrite1h: 0 })
+    const t = models[mk] || (models[mk] = { input: 0, output: 0, cacheRead: 0, cacheWrite5m: 0, cacheWrite1h: 0, long: { input: 0, output: 0, cacheRead: 0, cacheWrite5m: 0, cacheWrite1h: 0 } })
     for (const k of Object.keys(tokens)) { tokens[k] += u[k]; t[k] += u[k] }
+    // messages whose prompt is over 100,000 tokens: a subset of the sums,
+    // priced at a model's over100k rate (spec 1.3 3.2); a 1.2 reader ignores it
+    if (u.input + u.cacheRead + u.cacheWrite5m + u.cacheWrite1h > 100000) for (const k of Object.keys(tokens)) t.long[k] += u[k]
   }
   const list = [...files.values()].sort((a, b) => (b.edit + b.write) - (a.edit + a.write) || b.read - a.read)
   const summary = {
@@ -313,37 +316,91 @@ function transcriptFor(id, startedAt, given, freshMs) {
 }
 
 // ---------- prices
-function readPrices() {
+/** The owner's price file (else the empty template), parsed, or null. */
+function readPricesFile() {
   for (const f of [P.PRICES, P.PRICES_TEMPLATE]) {
     try {
       const j = JSON.parse(P.stripBom(fs.readFileSync(f, 'utf8')))
-      return j && typeof j.models === 'object' && j.models ? j.models : {}
+      if (j && typeof j === 'object') return j
     } catch { /* not there or not readable: try the next */ }
   }
-  return {}
+  return null
+}
+function readPrices() {
+  const j = readPricesFile()
+  return j && typeof j.models === 'object' && j.models ? j.models : {}
 }
 const PRICE_FIELDS = ['input', 'output', 'cacheRead', 'cacheWrite5m', 'cacheWrite1h']
-const pricesSet = (prices) => Object.values(prices).some((p) => p && PRICE_FIELDS.every((k) => typeof p[k] === 'number'))
+/** A price is used only when it is a finite number >= 0 (spec 1.3 3.2). */
+const validPrice = (v) => typeof v === 'number' && Number.isFinite(v) && v >= 0
+const pricesSet = (prices) => Object.values(prices).some((p) => p && PRICE_FIELDS.every((k) => validPrice(p[k])))
 
-/** USD for a transcript's tokens, or null with the reason. A price is only
- *  used when the user has typed it into model-prices.json. */
-function costOf(t, prices) {
-  if (!t || !t.found || !t.models) return { usd: null, why: 'nodata' }
-  let usd = 0
-  for (const [stored, tok] of Object.entries(t.models)) {
-    // a transcript counted before the alias was set keeps the bare family
-    const mk = modelAlias(stored)
-    // own keys only: a model named "constructor" must not find Object's
-    const p = (Object.hasOwn(prices, mk) && prices[mk]) || (Object.hasOwn(prices, mk.split(' ')[0]) && prices[mk.split(' ')[0]])
-    if (!p) return { usd: null, why: 'prices' }
-    for (const k of PRICE_FIELDS) {
-      if (!tok[k]) continue
-      if (typeof p[k] !== 'number') return { usd: null, why: 'prices' }
-      usd += tok[k] * p[k] / 1e6
-    }
-  }
-  return { usd, why: '' }
+/** The price entry of a stored model name, own keys only: a model named
+ *  "constructor" must not find Object's. */
+function priceOf(prices, stored) {
+  // a transcript counted before the alias was set keeps the bare family
+  const mk = modelAlias(stored)
+  return (Object.hasOwn(prices, mk) && prices[mk]) || (Object.hasOwn(prices, mk.split(' ')[0]) && prices[mk.split(' ')[0]]) || null
 }
+/** USD of one set of sums at one price entry, or null when a price a token
+ *  needs is missing or malformed. */
+function priceSums(tok, p) {
+  let usd = 0
+  for (const k of PRICE_FIELDS) {
+    if (!tok[k]) continue
+    if (!p || !validPrice(p[k])) return null
+    usd += tok[k] * p[k] / 1e6
+  }
+  return usd
+}
+function priceTokens(models, prices) {
+  let usd = 0
+  let note = ''
+  for (const [stored, tok] of Object.entries(models)) {
+    const p = priceOf(prices, stored)
+    if (!p) return { usd: null, why: 'prices' }
+    const over = p.over100k && typeof p.over100k === 'object' ? p.over100k : null
+    const lg = tok.long && typeof tok.long === 'object' ? tok.long : null
+    let part
+    if (over && lg) {
+      const rest = {}
+      for (const k of PRICE_FIELDS) rest[k] = Math.max(0, (tok[k] || 0) - (lg[k] || 0))
+      const a = priceSums(rest, p), b = priceSums(lg, over)
+      part = a === null || b === null ? null : a + b
+    } else {
+      part = priceSums(tok, p)
+      if (over && !lg && part !== null) note = 'base rate; prompt size not recorded'
+    }
+    if (part === null) return { usd: null, why: 'prices' }
+    usd += part
+  }
+  return { usd, why: '', note }
+}
+
+/** The meters a run reported itself, as the five sums, or null unless input,
+ *  output, cache read and a cache write are all there (spec 1.3 3.1). */
+function reportedMeters(u) {
+  const n = (v) => (typeof v === 'number' && Number.isSafeInteger(v) && v >= 0 ? v : undefined)
+  const input = n(u.inputTokens), output = n(u.outputTokens), cacheRead = n(u.cacheReadTokens)
+  const w = n(u.cacheWriteTokens), w5 = n(u.cacheWrite5mTokens), w1 = n(u.cacheWrite1hTokens)
+  if (input === undefined || output === undefined || cacheRead === undefined || (w === undefined && w5 === undefined && w1 === undefined)) return null
+  return { input, output, cacheRead, cacheWrite5m: (w || 0) + (w5 || 0), cacheWrite1h: w1 || 0 }
+}
+
+/** USD for a run, or null with the reason. Meters from a found transcript
+ *  win; else four reported meters with a model; a bare total is never priced.
+ *  A price is only used when the user has typed it into model-prices.json. */
+function costOf(t, prices, rep) {
+  if (t && t.found && t.models) return Object.assign(priceTokens(t.models, prices), { src: 'transcript' })
+  if (rep && rep.meters && rep.model) {
+    const c = priceTokens({ [rep.model]: rep.meters }, prices)
+    return Object.assign(c, { src: rep.estimated ? 'estimated' : 'reported' })
+  }
+  return { usd: null, why: 'nodata', src: '' }
+}
+
+/** New tokens (no cache reads) of reported meters: a run that gave the four meters but no total is still measured. */
+const meterNew = (m) => (m ? m.input + m.output + m.cacheWrite5m + m.cacheWrite1h : 0)
 
 /** The derived fields the pages use, less the brief; the record on disk
  *  stays as it is. */
@@ -351,7 +408,13 @@ function describe(r, prices) {
   const took = Date.parse(r.finishedAt) - Date.parse(r.startedAt)
   const u = r.usage && typeof r.usage === 'object' ? r.usage : {}
   const t = r.transcript && typeof r.transcript === 'object' ? r.transcript : null
-  const cost = costOf(t, prices || {})
+  const mkey = modelKey(r.model || u.model)
+  const reported = reportedMeters(u)
+  const cost = costOf(t, prices || {}, { meters: reported, model: mkey, estimated: u.estimated === true })
+  const found = !!(t && t.found)
+  const meters = found && t.tokens ? t.tokens : reported
+  const provider = r.provider || u.provider || (/^(Opus|Sonnet|Haiku|Fable)\b/.test(mkey) ? 'anthropic' : '')
+  const cacheDen = meters ? meters.input + meters.cacheRead + meters.cacheWrite5m + meters.cacheWrite1h : 0
   // the brief stays on the server, where a resume reads it from the run file
   // (resume.cjs): never in /api/state, the page's JSON or the saved pages
   delete r.brief
@@ -362,11 +425,19 @@ function describe(r, prices) {
     parentId: String(r.parent || parentFromTask(r.task)),
     // The Agent tool's totalTokens is the size of the agent's last context,
     // not a sum over the run, so the transcript's count wins when there is one.
-    tokTotal: t && t.found ? t.tokensNew : (Number(r.tokens) || Number(u.tokens) || 0),
-    tokSrc: t && t.found ? 'transcript' : (Number(r.tokens) || Number(u.tokens) ? 'reported' : ''),
+    tokTotal: t && t.found ? t.tokensNew : (Number(r.tokens) || Number(u.tokens) || meterNew(reported)),
+    tokSrc: t && t.found ? 'transcript' : (Number(r.tokens) || Number(u.tokens) || meterNew(reported) ? 'reported' : ''),
     toolTotal: Number(u.toolUses) || (t && t.found ? t.toolUses : 0),
     costUsd: cost.usd,
     costWhy: cost.why,
+    costNote: cost.usd === null ? '' : (cost.note || ''),
+    costSrc: cost.usd === null ? '' : cost.src,
+    meters: meters ? { input: meters.input, output: meters.output, cacheRead: meters.cacheRead, cacheWrite5m: meters.cacheWrite5m, cacheWrite1h: meters.cacheWrite1h } : null,
+    meterSrc: found && t.tokens ? 'transcript' : reported ? (u.estimated === true ? 'estimated' : 'reported') : '',
+    provider,
+    cacheShare: meters && cacheDen > 0 ? meters.cacheRead / cacheDen : null,
+    wallSeconds: Math.round((Number(r.durationMs) || Number(u.durationMs) || (took > 0 ? took : 0)) / 1000),
+    turns: found && Number.isFinite(t.messages) ? t.messages : null,
   })
 }
 
@@ -376,7 +447,7 @@ const fileFor = (dir, id) => path.join(dir, String(id).replace(/[^\w.-]/g, '') +
 const clip = (s, n) => String(s == null ? '' : s).slice(0, n)
 const GATE_KINDS = ['A', 'B', 'C', 'approval']
 const GATE_STATUS = ['waiting', 'answered', 'expired']
-const APPROVAL_TYPES = ['gate', 'hire', 'action', 'budget_override', 'generic']
+const APPROVAL_TYPES = ['gate', 'hire', 'action', 'budget_override', 'proposal', 'generic']
 const ACTION_TYPES = ['merge', 'next-phase', 'build', 'publish', 'other']
 
 /** Creates a gate, or updates the one with this id. Each change is kept in
@@ -445,8 +516,15 @@ function saveGateLocked(input, via, gateId, reusing) {
       if (s && s.length > 8192) throw new Error('payload is larger than 8 KB')
       g.payload = s ? JSON.parse(s) : null
     }
+    // spec 1.4 section 8: what an agent proposes (tools/proposals.cjs cleans it before it gets here)
+    if (input.proposal && typeof input.proposal === 'object') {
+      const pr = input.proposal, s = JSON.stringify(pr.payload === undefined ? {} : pr.payload)
+      if (s.length > 8192) throw new Error('proposal is larger than 8 KB')
+      g.proposal = { kind: clip(pr.kind, 20), payload: JSON.parse(s), why: clip(pr.why, 300), evidence: clip(pr.evidence, 200), hash: clip(pr.hash, 64) }
+    }
   }
   if (input.hiredAt !== undefined) g.hiredAt = clip(input.hiredAt, 40)
+  if (input.appliedAt !== undefined) g.appliedAt = clip(input.appliedAt, 40)
   const status = input.status !== undefined ? String(input.status) : ''
   if (status && !GATE_STATUS.includes(status)) throw new Error('status must be ' + GATE_STATUS.join('|'))
   if (status) g.status = status
@@ -471,7 +549,7 @@ function waitingMatch(input) {
   const want = projectKey(input.project)
   const words = (s) => new Set(String(s || '').toLowerCase().match(/[\p{L}\p{N}][\p{L}\p{N}.-]{2,}/gu) || [])
   const mine = new Set([...words(input.question), ...words(input.label)])
-  const open = readJsonDir(GATES).filter((g) => g.status === 'waiting' && (!want || projectKey(g.project) === want))
+  const open = readJsonDir(GATES).filter((g) => g.status === 'waiting' && g.approvalType !== 'proposal' && (!want || projectKey(g.project) === want))
   let best = null, bestScore = 0
   for (const g of open) {
     const theirs = new Set([...words(g.question), ...words(g.label)])
@@ -597,6 +675,11 @@ function saveDecision(input) {
   if (input.by !== undefined) d.by = ['user', 'supervisor', 'agent'].includes(String(input.by)) ? String(input.by) : 'agent'
   if (input.agent !== undefined) d.agent = clip(input.agent, 60)
   if (input.state !== undefined) d.state = String(input.state) === 'open' ? 'open' : 'taken'
+  // plan decisions (spec 1.4 3.3): additive fields
+  if (input.options !== undefined) d.options = Array.isArray(input.options) ? input.options.slice(0, 8).map((o) => clip(o, 60)).filter(Boolean) : []
+  for (const k of ['recommendation', 'answer']) if (input[k] !== undefined) d[k] = clip(input[k], 300)
+  for (const k of ['planId', 'source', 'targetVersion']) if (input[k] !== undefined) d[k] = clip(input[k], k === 'source' ? 120 : 60)
+  if (input.missingInImport !== undefined) { if (input.missingInImport) d.missingInImport = true; else delete d.missingInImport }
   d.updatedAt = now
   writeAtomic(file, JSON.stringify(d, null, 2))
   return d
@@ -636,7 +719,9 @@ function collect() {
     runs: runs.map((r) => describe(r, prices)).sort((a, b) => String(b.finishedAt).localeCompare(String(a.finishedAt))),
     active: active.sort((a, b) => String(a.startedAt).localeCompare(String(b.startedAt))),
     agents: readAgents(),
-    gates: readJsonDir(GATES).map((g) => Object.assign(g, {
+    // proposals (spec 1.4 section 8) wait in their own tray: they block no one, so they are neither
+    // counted as waiting for the owner nor handed to an agent's context pack
+    gates: readJsonDir(GATES).filter((g) => !(g && g.approvalType === 'proposal')).map((g) => Object.assign(g, {
       projectKey: projectKey(g.project),
       // what a page sends back with an answer (answerGate): the gate it showed
       qhash: questionHash(g),
@@ -644,9 +729,10 @@ function collect() {
       // (log-agent-run --answers) since: shown as "read" next to the answer
       seen: (g.history || []).some((x) => x.via === 'dashboard') && !!seen.through && String(g.answeredAt || g.expiredAt || '') <= seen.through,
     })).sort((a, b) => String(a.askedAt).localeCompare(String(b.askedAt))),
+    proposals: readJsonDir(GATES).filter((g) => g && g.approvalType === 'proposal').map((g) => Object.assign(g, { projectKey: projectKey(g.project) })).sort((a, b) => String(b.askedAt).localeCompare(String(a.askedAt))),
     answers: { unread: unreadAnswers(false).fresh.length, through: seen.through },
     decisions: readJsonDir(DECISIONS).map((d) => Object.assign(d, { projectKey: projectKey(d.project) })).sort((a, b) => String(a.at).localeCompare(String(b.at))),
-    prices: { file: 'model-prices.json', set: pricesSet(prices) },
+    prices: { file: 'model-prices.json', set: pricesSet(prices), source: ((readPricesFile() || {}).source) || null },
     heavy: Array.isArray(P.CONFIG.heavyModels) ? P.CONFIG.heavyModels.map(String).slice(0, 20) : ['Opus'],
     // config.json "desks": {name: [zone, slot]}, desks kept where an earlier layout had them (homeDesks)
     desks: pinnedDesks(P.CONFIG.desks),
@@ -729,7 +815,7 @@ function build() {
 
 module.exports = {
   build, collect, snapshot, invalidate, companyOf, renderPage, renderArchive, projectKey, modelKey, OUT, OUT_ARCHIVE,
-  langFromRequest, saveGate, answerGate, dismissGate, unreadAnswers, readAnswers, saveDecision, transcriptFor, readTranscript, writeAtomic, ANSWERS,
+  readPrices, readPricesFile, validPrice, priceOf, langFromRequest, saveGate, answerGate, dismissGate, unreadAnswers, readAnswers, saveDecision, transcriptFor, readTranscript, describe, writeAtomic, ANSWERS,
 }
 
 if (require.main === module) {

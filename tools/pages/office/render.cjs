@@ -8,6 +8,7 @@ const { WORLD_STYLE, campusArt, office3d, worldScripts } = require('../../office
 const { characterScripts, PEOPLE_STYLE } = require('../world/people.cjs')
 const { ACTIVITY_STYLE, activityView } = require('../../activity-page.cjs')
 const { VR_STYLE, versionRunView } = require('../../version-run-page.cjs')
+const { SAV_STYLE, savingsView } = require('../../savings.cjs')
 const { EVERYONE_STYLE, everyoneViews } = require('../../everyone-page.cjs')
 const { everyoneArt } = require('../../everyone-art.cjs')
 const { homeDesks } = require('./home-desks.cjs')
@@ -15,6 +16,8 @@ const { OFFICE_STYLE, CR_STYLE } = require('./style.cjs')
 const { controlRoom } = require('./control-room.cjs')
 const { STAGE_STYLE } = require('../stage/style.cjs')
 const { GLASS_STYLE } = require('../stage/glass.cjs')
+const { LISTBOX_STYLE, listboxView } = require('../stage/listbox.cjs')
+const { PLAN_STYLE } = require('./plan-style.cjs')
 const { IDENTITY_STYLE, dsMark, dsLogo, DS_FAVICON } = require('../stage/identity.cjs')
 const { officeClient } = require('./client.cjs')
 
@@ -22,7 +25,7 @@ const { officeClient } = require('./client.cjs')
 const tabIcon = (d) => '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="' + d + '"/></svg>'
 const BTABS = [
   ['campus', 'Campus', tabIcon('M3 21h18M5 21V8l7-4 7 4v13M9 21v-6h6v6M9 10h.01M15 10h.01')],
-  ['office', 'Office', tabIcon('M4 20h16M6 20v-7h12v7M9 13V8h6v5M12 4v4')],
+  ['plan', 'Plan', tabIcon('M4 6h16M4 12h10M4 18h13M19 15v6M16 18h6')],
   ['live', 'Live', tabIcon('M3 12h4l3-7 4 14 3-7h4')],
   ['appr', 'Decisions', tabIcon('M4 5h16v14H4zM8 12l3 3 5-6')],
   ['team', 'Team', tabIcon('M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM2 21v-1a6 6 0 0 1 12 0v1M16 4a4 4 0 0 1 0 7M22 21v-1a6 6 0 0 0-4-5.6')],
@@ -57,15 +60,15 @@ function renderOffice(state, opts = {}) {
 ${refresh}
 <link rel="icon" href="${DS_FAVICON}" />
 <title>Arsenale</title>
-<style>${OFFICE_STYLE}${CR_STYLE}${COMPANY_STYLE}${WORLD_STYLE}${PEOPLE_STYLE}${ACTIVITY_STYLE}${VR_STYLE}${EVERYONE_STYLE}${STAGE_STYLE}${GLASS_STYLE}${IDENTITY_STYLE}</style>
+<style>${OFFICE_STYLE}${CR_STYLE}${COMPANY_STYLE}${WORLD_STYLE}${PEOPLE_STYLE}${ACTIVITY_STYLE}${VR_STYLE}${SAV_STYLE}${EVERYONE_STYLE}${STAGE_STYLE}${GLASS_STYLE}${LISTBOX_STYLE}${PLAN_STYLE}${IDENTITY_STYLE}</style>
 </head>
 <body>
 <div class="board${live ? ' served' : ''}${showcase ? ' showcase' : ''}" id="board">
   <header class="top">
     <h1 class="brand${co ? ' co' : ''}">${dsMark(28)}<span class="wm">${dsLogo(26)}<b class="sr">Arsenale</b></span><span class="scrn" id="scrn"></span></h1><span class="date" id="date"></span>
-    <div class="views" role="group" aria-label="${T('View')}"><button type="button" data-view="campus" aria-pressed="false">${T('Campus')}</button><button type="button" data-view="office" id="vtab-office" aria-pressed="true">${T('Office')}</button>${co
+    <div class="views" role="group" aria-label="${T('View')}"><button type="button" data-view="campus" aria-pressed="false">${T('Campus')}</button>${co ? '' : `<button type="button" data-view="office" id="vtab-office" aria-pressed="true">${T('Office')}</button>`}${co
       // five screens in the bar; the rest, and the two views from before the company, under "More"
-      ? '<button type="button" data-omenu="office" id="omenu-office" aria-label="' + T('Choose an office') + '" aria-haspopup="true">▾</button><button type="button" data-view="live" aria-pressed="false">' + T('Live') + '</button><button type="button" data-view="appr" aria-pressed="false">' + T('Decisions') + '<span class="tc" id="tc-appr"></span></button><button type="button" data-view="team" aria-pressed="false">' + T('Team') + '</button><button type="button" data-omenu="legacy" id="omenu-legacy" aria-haspopup="true">' + T('More') + ' ▾</button>'
+      ? '<button type="button" data-omenu="office" id="omenu-office" aria-label="' + T('Choose an office') + '" aria-haspopup="true">▾</button><button type="button" data-view="plan" aria-pressed="false">' + T('Plan') + '</button><button type="button" data-view="live" aria-pressed="false">' + T('Live') + '</button><button type="button" data-view="appr" aria-pressed="false">' + T('Decisions') + '<span class="tc" id="tc-appr"></span></button><button type="button" data-view="team" aria-pressed="false">' + T('Team') + '</button><button type="button" data-omenu="legacy" id="omenu-legacy" aria-haspopup="true">' + T('More') + ' ▾</button>'
       : `<button type="button" data-view="appr" aria-pressed="false">${T('Decisions')}</button><button type="button" data-view="dec" aria-pressed="false">${T('Gate history')}</button><button type="button" data-view="use" aria-pressed="false">${T('Tools & usage')}</button><button type="button" data-view="act" aria-pressed="false">${T('Activity')}</button><button type="button" data-view="live" aria-pressed="false">${T('Live')}</button><button type="button" data-view="set" aria-pressed="false">${T('Settings')}</button>`}</div>
     <div class="sgrp" role="status"><ul class="counts" id="counts" aria-label="${T('Summary')}"></ul>
     <span class="live" id="mode"${live ? ' title="' + T('Refreshes every 1.5 seconds') + '"' : ''}><i></i> ${live ? T('Live') : T('Built file · refreshes automatically')}</span></div>
@@ -91,6 +94,8 @@ ${refresh}
   <main class="vm" id="v-use" aria-label="${T('Tools & usage')}" hidden></main>
   <main class="vm" id="v-act" aria-label="${T('Activity')}" hidden></main>
   <main class="vm" id="v-vr" aria-label="${T('Version run')}" hidden></main>
+  <main class="vm" id="v-sav" aria-label="${T('Savings')}" hidden></main>
+  <main class="vm" id="v-plan" aria-label="${T('Plan')}" hidden></main>
   <main class="cv" id="v-campus" aria-label="${T('Campus')}" hidden></main>
   <main class="cv" id="v-org" aria-label="${T('Org chart')}" hidden></main>
   <main class="ev" id="v-ev" hidden></main>
@@ -118,6 +123,8 @@ const controlRoom = (${controlRoom.toString()});
 const companyViews = (${companyViews.toString()});
 const activityView = (${activityView.toString()});
 const versionRunView = (${versionRunView.toString()});
+const savingsView = (${savingsView.toString()});
+const listboxView = (${listboxView.toString()});
 const everyoneArt = (${everyoneArt.toString()});
 const everyoneViews = (${everyoneViews.toString()});
 (${officeClient.toString()})();

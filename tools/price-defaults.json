@@ -1,0 +1,10 @@
+{
+  "source": { "label": "Anthropic list prices, standard API", "url": "https://platform.claude.com/docs/en/about-claude/pricing", "fetched": "2026-11-18" },
+  "models": {
+    "Fable 5.2":  { "provider": "anthropic", "input": 8,    "output": 40,   "cacheRead": 0.20, "cacheWrite5m": 10,    "cacheWrite1h": 16 },
+    "Opus 5.5":   { "provider": "anthropic", "input": 4,    "output": 20,   "cacheRead": 0.20, "cacheWrite5m": 5,     "cacheWrite1h": 8 },
+    "Sonnet 5.5": { "provider": "anthropic", "input": 2,    "output": 10,   "cacheRead": 0.10, "cacheWrite5m": 2.50,  "cacheWrite1h": 4 },
+    "Haiku 5.5":  { "provider": "anthropic", "input": 0.10, "output": 0.50, "cacheRead": 0.01, "cacheWrite5m": 0.125, "cacheWrite1h": 0.20,
+                    "over100k": { "input": 0.50, "output": 2.50, "cacheRead": 0.05, "cacheWrite5m": 0.625, "cacheWrite1h": 1 } }
+  }
+}

@@ -87,6 +87,8 @@ const P = {
   PRICES: path.join(HOME, 'model-prices.json'),
   // the empty template in the repo, used until the user has a file of their own
   PRICES_TEMPLATE: path.join(__dirname, 'model-prices.json'),
+  // official list prices, copied into the owner's file only by `arsenale prices init`
+  PRICE_DEFAULTS: path.join(__dirname, 'price-defaults.json'),
   // Arsenale's own agent folder: the only one the dashboard writes team
   // members into (office packs, the hire form)
   MANAGED_AGENTS: path.join(HOME, 'agents'),
