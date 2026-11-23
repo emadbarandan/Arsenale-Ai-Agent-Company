@@ -51,9 +51,11 @@ You, your assistant, and the offices with the people who work in them:
   MCP) and follows for one task, logging the job under that name. Only Claude
   Code can also run team members as separate sub-agents. Arsenale does not
   give you seven AIs working in parallel in one chat window.
-- **It ships with an agent team** (`agents/`): 20 specialist agents
-  (implementer, tester, code-reviewer, security-reviewer, ui-designer, …), an
-  office lead with three heads (engineering, product, research), shared rules
+- **It ships with an agent team** (`agents/`): 25 agents in
+  all: 21 specialists (implementer, tester, code-reviewer, security-reviewer,
+  ui-designer, …), an office lead and three heads (engineering, product,
+  research). Besides the core team, 16 more office packs (17 in all) ship in
+  `packs/`. Shared rules
   and a development cycle with three human gates. Use them, or bring your own;
   the dashboard draws whatever agents you have.
 
@@ -62,8 +64,8 @@ You, your assistant, and the offices with the people who work in them:
 You need [Node.js](https://nodejs.org) 22 or newer and git.
 
 ```
-git clone https://github.com/emadbarandan/Arsenale.git
-cd Arsenale
+git clone https://github.com/emadbarandan/Arsenale-Ai-Agent-Company.git
+cd Arsenale-Ai-Agent-Company
 node bin/arsenale.cjs demo
 ```
 
@@ -744,7 +746,7 @@ back from the backup), the launchers and the PATH entry. Your run logs stay in
 
 ## Status
 
-Version 1.1.0. There is no desktop app yet: Arsenale runs as `arsenale serve`
+Version 1.2.2. There is no desktop app yet: Arsenale runs as `arsenale serve`
 in your browser, so the installer still needs Node.js. Tested on Windows 11
 with Node.js 24; the CI runs the test
 suite on Windows, macOS and Ubuntu with Node.js 22 and 24. The transcript

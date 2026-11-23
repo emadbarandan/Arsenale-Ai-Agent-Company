@@ -149,4 +149,4 @@ characters by Kay Lousberg, under CC0 1.0. The fallback character is made by a
 script in this repo and is also CC0. Sources, hashes and changes are in
 [tools/characters/LICENCES.md](tools/characters/LICENCES.md).
 
-Version 1.2.1.
+Version 1.2.2. It ships with 25 agents and 17 office packs.

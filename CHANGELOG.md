@@ -3,6 +3,12 @@
 All notable changes are listed here. Versions follow
 [Semantic Versioning](https://semver.org).
 
+## 1.2.2 (2026-11-23)
+
+- **A guard against pushing to the public repository.** `npm run setup-hooks` installs a git pre-push hook. It refuses any branch push to the public release repository and lets `v*` tags through. Pushes to any other remote are not touched.
+- **One set of numbers.** The README, the reference, `package.json` and the repository links now agree: 25 agents (an office lead, three heads and 21 specialists) and 17 office packs. A test fails if the README or the reference drift from the folders.
+- The contributing guide asks for Node.js 22, as the engine field does.
+
 ## 1.2.1 (2026-10-22)
 
 - **Windows: the phone settings folder is closed to other users.** On a folder whose access entries were its own, earlier versions left the Users group able to read it. Arsenale now removes every other entry.
