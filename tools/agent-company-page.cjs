@@ -35,7 +35,7 @@ h1.co{white-space:nowrap;font-size:17px}
 .ch{font:700 11px var(--font-ui);letter-spacing:.8px;text-transform:uppercase;color:var(--ink-dim);margin:0 0 8px;display:flex;gap:8px;align-items:center}
 .ch .sp{flex:1}
 /* campus: the map, its cards and its zoom bar are WORLD_STYLE in office-world.cjs */
-.cside{width:380px;flex:none;border-inline-start:1px solid var(--line);background:var(--panel);padding:16px 18px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#C9D1D9 transparent}
+.cside{width:380px;flex:none;border-inline-start:1px solid var(--line);background:var(--panel);padding:16px 18px;overflow-y:auto}@supports not selector(::-webkit-scrollbar){.cside{scrollbar-width:thin;scrollbar-color:#C9D1D9 transparent}}
 .ckpis{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
 .ckpi{border:1px solid var(--line);border-radius:5px;padding:8px 10px;background:var(--panel-raised);min-width:0}
 .ckpi b{display:block;font:700 20px var(--font-ui);color:#111A24;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -93,7 +93,7 @@ h1.co{white-space:nowrap;font-size:17px}
 .ovf button{font:11px var(--font-ui);color:var(--cyan);background:none;border:0;padding:0 3px;cursor:pointer;text-decoration:underline dotted}
 .chip.despite{color:var(--bad);border-color:rgba(200,55,45,.45);background:var(--bad-bg)}
 /* org chart */
-.org{padding:14px 20px 40px;height:100%;overflow:auto;scrollbar-width:thin;scrollbar-color:#C9D1D9 transparent;position:relative}
+.org{padding:14px 20px 40px;height:100%;overflow:auto;position:relative}@supports not selector(::-webkit-scrollbar){.org{scrollbar-width:thin;scrollbar-color:#C9D1D9 transparent}}
 .otools{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
 .otools h2{font-size:16px;margin:0;color:#111A24}
 .otools .sp{flex:1}

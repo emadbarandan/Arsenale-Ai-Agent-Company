@@ -43,7 +43,7 @@ them itself, one file per record, never rewriting another's:
 | What | File | Required fields |
 |---|---|---|
 | Running now | `agent-runs/active/<id>.json` | `id`, `agent`, `task`, `startedAt` (ISO time); optional `model`, `project`, `doing`, `steps:[{at,text}]`, `parent` |
-| Finished run | `agent-runs/<time>-<agent>-<rand>.json` | `agent`, `task`, `status` (`ok`/`findings`/`failed`/`stopped`), `finishedAt`; optional `id`, `startedAt`, `summary`, `findings[]`, `files[]`, `model`, `project`, `usage:{tokens,toolUses,durationMs,model}` |
+| Finished run | `agent-runs/<time>-<agent>-<rand>.json` | `agent`, `task`, `status` (`ok`/`findings`/`failed`/`stopped`), `finishedAt`; optional `id`, `startedAt`, `summary`, `findings[]`, `files[]`, `model`, `project`, `usage:{tokens,toolUses,durationMs,model}`; also optional whole-number meters `usage.inputTokens`, `outputTokens`, `cacheReadTokens`, `cacheWriteTokens` (or `cacheWrite5mTokens`/`cacheWrite1hTokens`), `usage.provider`, `usage.estimated`, and top-level `strategy`, `taskId` (alias of `issue`), `tier`. With all four meters (input, output, cache read, a cache write) and a priced model Arsenale shows a cost labelled reported or est.; `usage.tokens` alone is never priced |
 
 Delete the active file when you write the finished one. Write to a temporary
 name and rename, so the dashboard never reads half a file. The command does all

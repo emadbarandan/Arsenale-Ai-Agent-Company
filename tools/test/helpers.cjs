@@ -94,6 +94,7 @@ function makeSandbox(opts = {}) {
   linkTree(path.join(TOOLS, 'pages'), path.join(tools, 'pages'))
   // the 3D pages' pinned three.js and the characters (office-world.cjs); opts.flat leaves them out
   if (!opts.flat) for (const d of ['vendor', 'characters']) if (fs.existsSync(path.join(TOOLS, d))) linkTree(path.join(TOOLS, d), path.join(tools, d))
+  try { fs.copyFileSync(path.join(TOOLS, 'price-defaults.json'), path.join(tools, 'price-defaults.json')) } catch { /* no defaults file */ }
   fs.writeFileSync(path.join(root, 'model-prices.json'), JSON.stringify({ models: opts.prices || {} }))
   // the user's own settings never leak in: no agent or transcript folders from the environment
   const env = Object.assign({}, process.env, { ARSENALE_HOME: root }, opts.env || {})
@@ -234,9 +235,10 @@ function mcpClient(sb, name, extraEnv) {
  *  this child. */
 async function startServer(sb, opts = {}) {
   // a random port can be in use already (on Linux the ports the system hands
-  // out for outgoing connections overlap these): another one is tried
+  // out for outgoing connections overlap these, and Windows reserves ranges
+  // that answer EACCES): another one is tried
   for (let n = 1; ; n++) {
-    try { return await startOnce(sb, opts) } catch (e) { if (n >= 4 || !/is taken/.test(e.message)) throw e }
+    try { return await startOnce(sb, opts) } catch (e) { if (n >= 4 || !/is taken|EACCES/.test(e.message)) throw e }
   }
 }
 function startOnce(sb, opts) {

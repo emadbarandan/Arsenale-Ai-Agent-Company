@@ -111,7 +111,7 @@
     board.classList.toggle('rail-open', railOpen)
     board.classList.toggle('co', !!CO)
     // the campus and the org chart need the width: the rail folds to its strip there
-    board.classList.toggle('rail-mini', mode === 'campus' || mode === 'org' || mode === 'vr' || EV.MODES.includes(mode))
+    board.classList.toggle('rail-mini', mode === 'campus' || mode === 'org' || mode === 'vr' || mode === 'sav' || mode === 'plan' || EV.MODES.includes(mode))
     $('v-office').hidden = mode !== 'office'
     $('v-dec').hidden = mode !== 'dec'
     $('v-use').hidden = mode !== 'use'
@@ -119,6 +119,8 @@
     $('v-org').hidden = mode !== 'org'
     $('v-act').hidden = mode !== 'act'
     $('v-vr').hidden = mode !== 'vr'
+    $('v-sav').hidden = mode !== 'sav'
+    $('v-plan').hidden = mode !== 'plan'
     $('v-ev').hidden = !EV.MODES.includes(mode)
     if (EV.MODES.includes(mode)) EV.render(mode, $('v-ev'))
     EV.renderWizard($('wiz'))
@@ -165,6 +167,12 @@
       const box = $('vr'), top = box ? box.scrollTop : 0
       $('v-vr').innerHTML = VV.render(S0)
       if ($('vr')) $('vr').scrollTop = top
+    } else if (mode === 'sav') {
+      const box = $('sv'), top = box ? box.scrollTop : 0
+      $('v-sav').innerHTML = SV.render()
+      if ($('sv')) $('sv').scrollTop = top
+    } else if (mode === 'plan') {
+      PV.mount($('v-plan'))
     } else if (mode === 'use') {
       const box = $('v-use').querySelector('.runs-box'), top = box ? box.scrollTop : 0
       $('v-use').innerHTML = CR.usage(S)

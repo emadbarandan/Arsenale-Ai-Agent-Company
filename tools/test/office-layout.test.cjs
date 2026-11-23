@@ -134,4 +134,10 @@ test('the top bar fits at 1366 with every count showing, "Live" whole and nothin
   assert.ok(got.overflow <= 0, 'the header is not wider than the window: ' + JSON.stringify(got))
   for (const k of got.kids) assert.ok(k.r <= got.vw + 0.5 && k.own <= 1, 'header item ' + k.id + ' is whole inside the window: ' + JSON.stringify(k))
   assert.equal(got.live, 'Live')
+  // 1.4: the bar is Campus, Plan, Live, Decisions, Team and More (Office is under More), all whole
+  const bar = await page.eval(`(() => { const v = document.querySelector('.top .views'); const bs = [...v.querySelectorAll('button[data-view], button[data-omenu=legacy]')]; return { names: bs.map((b) => b.textContent.trim().replace(/\\s+/g, ' ')), whole: v.scrollWidth <= v.clientWidth + 1 && bs.every((b) => b.getBoundingClientRect().right <= window.innerWidth) } })()`)
+  assert.deepEqual(bar.names.slice(0, 5), ['Campus', 'Plan', 'Live', 'Decisions', 'Team'])
+  assert.equal(bar.names.length, 6)
+  assert.match(bar.names[5], /\u25be$/, 'the sixth is the More menu (it names Office while the office is open)')
+  assert.equal(bar.whole, true)
 })

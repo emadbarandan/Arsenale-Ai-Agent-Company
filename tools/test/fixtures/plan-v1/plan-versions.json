@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "project": "demo-bakery",
+  "phases": [
+    {"id": "V1", "title": "v2.1 Ordering", "goal": "Customers can order online", "status": "doing"},
+    {"id": "V2", "title": "v2.2 Delivery", "goal": "Routes and tracking", "status": "todo"}
+  ],
+  "tasks": [
+    {"id": "O-01", "title": "Order form", "phase": "V1", "status": "done", "type": "feature", "size": "L", "tier": "heavy", "owner": "agent"},
+    {"id": "O-02", "title": "Payment copy", "phase": "V1", "status": "review", "type": "chore", "size": "S", "tier": "light", "owner": "owner", "notes": "Wording for the pay button"},
+    {"id": "O-03", "title": "Route planner", "phase": "V2", "status": "todo", "type": "feature", "size": "L", "tier": "heavy", "owner": "agent"},
+    {"id": "O-04", "title": "Pulled-forward tracking link", "phase": "V2", "target_version": "2.1", "status": "doing", "type": "feature", "size": "M", "tier": "standard", "owner": "agent"}
+  ],
+  "decisions": [
+    {"id": "D1", "question": "Pay online?", "options": ["yes", "no"], "recommendation": "yes", "status": "open"}
+  ]
+}

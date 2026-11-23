@@ -48,7 +48,26 @@ Commands
                                  (Settings > Connect your assistant shows the exact line)
   task | comment | deliverable | check-action
                                  short for "log --task", "log --comment" …
+  ledger [--by run|task|version|office|model|week] [--since D] [--until D] [--json]
+                                 finished runs grouped, with tokens and cost (n/a or "not recorded", never $0 for unknown)
+  savings [--week 2026-W47] [--json] [--write]
+                                 this week's spend, cost per done task, tier suggestions (est.); --write saves reports/savings-<week>.md
+  context [--project ID] [--write] [--json]
+                                 a short brief of one project (at most 1,500 tokens) for an assistant; --write saves it in the data folder
+  prices [show|init|check] [--force|--merge]
+                                 the price file: show it, fill it with list prices (init), list models without a price
+  plan [show] [--project ID] [--json]   versions, phases and progress; owner key: plan version add|edit|move|drop <name>, plan into <task> <version> [--phase ID]
+  today [--json]   what is doing, next, waiting for you and blocked, across projects
+  next [--project ID] [--claim] [--release <task>] [--json]   the next approved task with its context pack (starts nothing); --claim: supervisor claims it
+  queue [list|add <task>...|remove <task>|move <task> <n|up|down>|clear]   the work queue; changes need the owner key
+  import-plan <file> --project ID (--phases-as versions | --version N) [--dry-run] [--shadow | --promote]   owner key: read a schema-v1 plan in (three-way merge, never deletes)
+  plan-parity <hq.json> --project ID (--phases-as versions | --version N) [--shadow] [--only-imported] [--write]   compare HQ export and Arsenale: counts, progress, weights
+  shadow drop --project ID   owner key: delete the M2 shadow copy (and nothing else)
+  plan restore <plan-m3-stamp> [--force]   owner key: undo a --promote from its backup (refuses to undo later work without --force)
+  release-notes VERSION --project ID [--write] [--json]   draft notes from the version's done tasks
+  export-plan --project ID (--phases-as versions | --version N) [--out F] [--force]   write the plan as schema v1
   build                          write the dashboard as static files into the data folder
+  plan-check <file> [--expect <expected.json>] [--json]   check a schema-v1 plan file (JSON) and print its progress
   paths                          print the data folder and where agents and transcripts are read
   help | --help                  this text;  --version  the version
 
@@ -215,6 +234,17 @@ else if (cmd === 'init' || cmd === 'autonomous' || cmd === 'awake') {
   process.exitCode = A[cmd](args, console.log)
 } else if (cmd === 'mcp') require(path.join(TOOLS, 'mcp-server.cjs')).runStdio()
 else if (cmd === 'finish') log(args)
+else if (cmd === 'ledger') process.exitCode = require(path.join(TOOLS, 'ledger.cjs')).run(args, console.log)
+else if (cmd === 'savings') process.exitCode = require(path.join(TOOLS, 'savings.cjs')).run(args, console.log)
+else if (cmd === 'context') process.exitCode = require(path.join(TOOLS, 'context-pack.cjs')).run(args, console.log)
+else if (cmd === 'plan-parity' || cmd === 'shadow' || (cmd === 'plan' && args[0] === 'restore')) process.exitCode = require(path.join(TOOLS, 'plan-migrate.cjs')).run(cmd === 'plan' ? args.slice(1) : args, console.log, cmd === 'plan' ? 'restore' : cmd)
+else if (cmd === 'today') { const Pl = require(path.join(TOOLS, 'plan.cjs')); const D = Pl.today(); console.log(args.includes('--json') ? JSON.stringify(D, null, 2) : Pl.todayText(D)) }
+else if (cmd === 'next') process.exitCode = require(path.join(TOOLS, 'queue.cjs')).run(args, console.log, 'next')
+else if (cmd === 'queue') process.exitCode = require(path.join(TOOLS, 'queue.cjs')).run(args, console.log, 'queue')
+else if (cmd === 'plan') process.exitCode = require(path.join(TOOLS, 'plan.cjs')).run(args, console.log)
+else if (cmd === 'release-notes') process.exitCode = require(path.join(TOOLS, 'release-notes.cjs')).run(args, console.log)
+else if (cmd === 'import-plan' || cmd === 'export-plan') process.exitCode = require(path.join(TOOLS, 'plan-io.cjs')).run(args, console.log, cmd)
+else if (cmd === 'prices') process.exitCode = require(path.join(TOOLS, 'prices.cjs')).run(args, console.log)
 else if (Object.hasOwn(ALIASES, cmd)) log(args.length === 1 && ['--help', '-h'].includes(args[0]) ? ['--help'] : [ALIASES[cmd], ...args])
 else if (cmd === 'build') {
   const B = require(path.join(TOOLS, 'build-agent-dashboard.cjs'))
@@ -223,4 +253,19 @@ else if (cmd === 'build') {
 } else if (cmd === 'paths') {
   const P = require(path.join(TOOLS, 'paths.cjs'))
   console.log(JSON.stringify({ home: P.HOME, runs: P.RUNS, company: P.COMPANY, agentDirs: P.AGENT_DIRS, transcriptRoots: P.TRANSCRIPT_ROOTS, prices: fs.existsSync(P.PRICES) ? P.PRICES : P.PRICES_TEMPLATE + ' (empty template)' }, null, 2))
+} else if (cmd === 'plan-check') {
+  const S = require(path.join(TOOLS, 'plan-schema.cjs'))
+  const file = args.find((a, i) => !a.startsWith('--') && args[i - 1] !== '--expect')
+  if (!file) fail('usage: arsenale plan-check <file> [--expect <expected.json>] [--json]')
+  let raw
+  try { const st = fs.statSync(file); if (st.size > S.MAX_BYTES) fail(file + ' is larger than 5 MB, refused'); raw = fs.readFileSync(file) } catch (e) { fail('cannot read ' + file + ': ' + e.code) }
+  const r = S.check(raw)
+  let diffs = []
+  const ei = args.indexOf('--expect')
+  if (ei >= 0) {
+    if (!args[ei + 1]) fail('--expect needs a file')
+    try { diffs = r.ok ? S.compareExpected(r, JSON.parse(fs.readFileSync(args[ei + 1], 'utf8'))) : ['plan is invalid'] } catch (e) { fail('cannot read expected file: ' + e.message) }
+  }
+  console.log(args.includes('--json') ? JSON.stringify({ ...r, expectDiffs: ei >= 0 ? diffs : undefined }, null, 2) : S.format(r) + (diffs.length ? '\nDiffers from expected:\n' + diffs.map((d) => '  - ' + d).join('\n') : ei >= 0 ? '\nMatches expected.' : ''))
+  process.exit(r.ok && !diffs.length ? 0 : 1)
 } else fail('unknown command "' + cmd + '" (see arsenale --help)')

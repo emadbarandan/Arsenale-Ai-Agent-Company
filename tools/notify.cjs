@@ -363,7 +363,7 @@ function message(g, channel, cfg) {
   const details = !!(c[channel] && c[channel].details)
   const co = require('./agent-company.cjs').readCompany()
   const office = co.configured && g.officeId ? (co.offices.find((o) => o.id === g.officeId) || {}).name : ''
-  const waiting = (() => { try { return fs.readdirSync(P.GATES).map((n) => { try { return JSON.parse(fs.readFileSync(path.join(P.GATES, n), 'utf8')) } catch { return null } }).filter((x) => x && x.status === 'waiting').length } catch { return 1 } })()
+  const waiting = (() => { try { return fs.readdirSync(P.GATES).map((n) => { try { return JSON.parse(fs.readFileSync(path.join(P.GATES, n), 'utf8')) } catch { return null } }).filter((x) => x && x.status === 'waiting' && x.approvalType !== 'proposal').length } catch { return 1 } })()
   if (!details) return { title: 'Arsenale', text: 'Arsenale: ' + waiting + ' question' + (waiting === 1 ? '' : 's') + ' waiting' + (office ? ' (' + office + ')' : ''), buttons: [] }
   const el = eligible(g, c)
   const q = clipCp(String(g.question || ''), 300)

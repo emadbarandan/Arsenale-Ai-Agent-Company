@@ -239,6 +239,7 @@
     if (t.status === 'done') html += '<span class="chip">' + ic('check', 11, 3) + ' ' + T('Done') + ' ' + esc(day(t.completedAt || t.updatedAt)) + '</span>'
     else if (t.dueDate) html += '<span class="chip' + (late || t.dueDate === today() ? ' bad' : '') + '">' + ic('cal', 12) + ' ' + esc(dueLabel(t.dueDate)) + '</span>'
     html += '</div>'
+    if (t.type || t.size || t.targetVersion) html += '<div class="rw" style="margin-top:8px;gap:6px">' + [t.type, t.size, t.targetVersion].filter(Boolean).map((v) => '<span class="chip">' + esc(v) + '</span>').join('') + '</div>'
     const act = activeFor(t)[0]
     if (t.status === 'blocked') html += '<p class="mut" style="font-size:12.5px;margin-top:6px">' + T('Stuck: your assistant needs something') + '</p>'
     else if (act) html += '<p class="mut" style="font-size:12.5px;margin-top:6px">' + T('Started ') + esc(ago(act.startedAt)) + '</p>'
@@ -262,7 +263,7 @@
       if (!g.length) continue
       html += '<h4>' + T(STATE[s]) + ' · ' + digits(g.length) + '</h4>' + g.map((t) => {
         const late = t.dueDate && t.dueDate < today() && !['done', 'cancelled'].includes(t.status)
-        return '<button type="button" class="lr" data-ev="task-open" data-arg="' + esc(t.id) + '"><span class="rw" style="gap:10px;min-width:0">' + face(whoId(t), 22, true) + '<span class="hi ell" dir="auto">' + esc(t.title) + '</span></span><span class="chip">' + esc(forWhom(t)) + '</span>' + (t.dueDate ? '<span class="chip' + (late ? ' bad' : '') + '">' + esc(dueLabel(t.dueDate)) + '</span>' : '<span></span>') +
+        return '<button type="button" class="lr" data-ev="task-open" data-arg="' + esc(t.id) + '"><span class="rw" style="gap:10px;min-width:0">' + face(whoId(t), 22, true) + '<span class="hi ell" dir="auto">' + esc(t.title) + '</span></span><span class="chip">' + esc(forWhom(t)) + '</span>' + (t.type || t.size ? '<span class="chip">' + esc([t.type, t.size].filter(Boolean).join(' ')) + '</span>' : '') + (t.dueDate ? '<span class="chip' + (late ? ' bad' : '') + '">' + esc(dueLabel(t.dueDate)) + '</span>' : '<span></span>') +
           '<span class="mut" style="font-size:12.5px">' + (t.seenAt ? T('seen by your assistant ') + hm(t.seenAt) : T('not seen yet')) + (t.comments ? ' · ' + digits(t.comments) + ' ' + T('comments') : '') + '</span></button>'
       }).join('')
     }
@@ -278,6 +279,14 @@
     return '<button type="button" class="chip warn" data-ev="goto-connect">' + T('Your assistant is not connected yet') + '</button>'
   }
   const members = () => (co() ? co().employees : []).filter((x) => x.kind === 'employee' && x.status !== 'retired')
+  // Plan schema v1 fields (all optional); only the owner's forms show them
+  function schemaFieldsHtml(t) {
+    t = t || {}
+    const sel = (name, label, list) => '<label class="fl" style="flex:1;min-width:120px">' + T(label) + '<select name="' + name + '"><option value="">—</option>' + list.map((v) => '<option value="' + v + '"' + (t[name] === v ? ' selected' : '') + '>' + esc(v) + '</option>').join('') + '</select></label>'
+    return '<div class="card pad"><div class="hi" style="font-weight:700;font-size:13px;margin-bottom:10px">' + T('Plan details') + ' <span class="op">' + T('Optional') + '</span></div><div class="rw" style="gap:12px;flex-wrap:wrap">' + sel('type', 'Type', ['feature', 'bug', 'chore']) + sel('size', 'Size', ['S', 'M', 'L']) + sel('tier', 'Tier', ['light', 'standard', 'heavy']) + '</div>' +
+      '<div class="rw" style="gap:12px;flex-wrap:wrap"><label class="fl" style="flex:1;min-width:120px">' + T('Target version') + '<input type="text" name="targetVersion" maxlength="20" dir="ltr" placeholder="1.3.1" value="' + esc(t.targetVersion || '') + '"></label><label class="fl" style="flex:1;min-width:120px">' + T('Token estimate') + '<input type="number" name="tokenEstimate" min="0" step="1" dir="ltr" value="' + (t.tokenEstimate === undefined || t.tokenEstimate === null ? '' : esc(String(t.tokenEstimate))) + '"></label></div>' +
+      '<label class="fl">' + T('Acceptance') + '<textarea name="acceptance" maxlength="2000" dir="auto" style="min-height:60px">' + esc(t.acceptance || '') + '</textarea></label></div>'
+  }
   function taskNew() {
     const pre = st.page.pre || {}
     const sel = st.page.who !== undefined ? st.page.who : pre.assignee || ''
@@ -295,6 +304,7 @@
     html += '<div class="card pad"><div class="hi" style="font-weight:700;font-size:13px;margin-bottom:10px">' + T('Who should do it?') + '</div><div style="max-height:300px;overflow:auto;padding:0 10px;margin:0 -10px">' + who('', T('Let my assistant choose'), A.robot(26)) +
       people.map((e) => who(e.id, esc(nameLine(e.id)), face(e.id, 26))).join('') + offices().map((o) => who('office:' + o.id, T('Anyone in ') + esc(officeName(o.id)), '<span class="sw" style="width:22px;height:22px;border-radius:5px;background:' + esc(o.color || '#56B6C2') + '"></span>')).join('') + who('board', T('Me'), A.owner(26)) + '</div></div>'
     html += '<div class="card pad"><label class="fl">' + T('When is it due?') + ' <span class="op">' + T('Optional') + '</span><input type="date" name="dueDate"><span class="hint" style="font-weight:400">' + T('A date in the past is allowed and shown in red.') + '</span></label><label class="rw" style="margin:0;cursor:pointer"><span class="sp"><b class="hi" style="font-size:14px;display:block">' + T('Ask me before it is finished') + '</b><span class="mut" style="font-size:12.5px">' + T('You see the result first') + '</span></span><input type="checkbox" class="tgl" name="needsSignOff"' + (pre.needsSignOff ? ' checked' : '') + '></label></div>'
+    html += schemaFieldsHtml(null)
     html += '<p class="note">' + ic('info', 14) + T('The task goes into your assistant\'s inbox. It is picked up the next time your assistant checks, usually when you open a chat.') + '</p></div></div></form>'
     return html
   }
@@ -367,6 +377,8 @@
     html += '<div class="card pad facts"><div><span class="mut">' + T('Assigned to') + '</span><span class="rw" style="gap:8px">' + face(whoId(t), 24) + '<b class="hi">' + esc(t.assigneeAgentId ? nameLine(t.assigneeAgentId) : forWhom(t)) + '</b></span></div>' +
       (t.assigneeAgentId || t.assigneeOfficeId ? '<div><span class="mut">' + T('Office') + '</span><span class="rw" style="gap:8px"><span class="sw" style="background:' + esc(colorOf(t.assigneeOfficeId || (emp(t.assigneeAgentId) || {}).homeOfficeId)) + '"></span><span class="hi">' + esc(officeName(t.assigneeOfficeId || (emp(t.assigneeAgentId) || {}).homeOfficeId)) + '</span></span></div>' : '') +
       '<div><span class="mut">' + T('Due') + '</span><b class="hi">' + (t.dueDate ? esc(dueLabel(t.dueDate)) + (t.dueDate < today() && t.status !== 'done' ? ' <span class="chip bad">' + T('This date has passed') + '</span>' : '') : '—') + '</b></div>' +
+      '<div><span class="mut">' + T('Plan') + '</span><b class="hi">' + esc([t.type, t.size, t.tier, t.targetVersion, t.tokenEstimate != null ? t.tokenEstimate + ' tokens' : ''].filter(Boolean).join(' · ') || '—') + '</b></div>' +
+      (t.acceptance ? '<div><span class="mut">' + T('Acceptance') + '</span><span class="hi" dir="auto">' + esc(t.acceptance) + '</span></div>' : '') +
       '<div><span class="mut">' + T('Time spent') + '</span><b class="hi">' + (spent ? esc(dur(spent)) : '—') + '</b></div>' +
       '<div><span class="mut">' + T('Created') + '</span><span class="hi">' + (t.createdBy === 'board' ? T('by you, ') : T('by your assistant, ')) + esc(day(t.createdAt)) + '</span></div></div>'
     if (canWrite()) html += '<button type="button" class="b" data-ev="task-copy" data-arg="' + esc(t.id) + '">' + ic('copy', 15) + T('Copy a message for your assistant') + '</button>'
@@ -386,6 +398,7 @@
     const opts = ['<option value="">' + T('Let my assistant choose') + '</option>'].concat(members().map((e) => '<option value="' + esc(e.id) + '"' + (sel === e.id ? ' selected' : '') + '>' + esc(nameLine(e.id)) + '</option>'), offices().map((o) => '<option value="office:' + esc(o.id) + '"' + (sel === 'office:' + o.id ? ' selected' : '') + '>' + T('Anyone in ') + esc(officeName(o.id)) + '</option>'), ['<option value="board"' + (sel === 'board' ? ' selected' : '') + '>' + T('Me') + '</option>'])
     return '<form class="card pad" data-evform="task-edit" data-id="' + esc(t.id) + '"><label class="fl">' + T('What do you need?') + '<input type="text" name="title" maxlength="200" required dir="auto" value="' + esc(t.title) + '"></label><label class="fl">' + T('Anything they should know?') + '<textarea name="description" maxlength="8000" dir="auto">' + esc(t.description || '') + '</textarea></label>' +
       '<div class="rw" style="gap:12px;align-items:flex-start"><label class="fl" style="flex:1">' + T('Who should do it?') + '<select name="who">' + opts.join('') + '</select></label><label class="fl" style="flex:1">' + T('When is it due?') + '<input type="date" name="dueDate" value="' + esc(t.dueDate || '') + '"></label></div>' +
+      schemaFieldsHtml(t) +
       '<div class="rw" style="gap:12px;flex-wrap:wrap"><label class="fl" style="margin:0">' + T('State') + '<select name="status" style="width:auto">' + ORDER.map((s) => '<option value="' + s + '"' + (t.status === s ? ' selected' : '') + '>' + T(STATE[s]) + '</option>').join('') + '</select></label><label class="rw" style="gap:8px;margin:18px 0 0;cursor:pointer"><input type="checkbox" class="tgl" name="needsSignOff"' + (t.needsSignOff ? ' checked' : '') + '><span class="soft">' + T('Ask me before it is finished') + '</span></label></div>' +
       '<div class="rw" style="gap:10px;margin-top:14px"><button type="submit" class="b pri">' + T('Save') + '</button><button type="button" class="b ghost" data-ev="task-edit">' + T('Cancel') + '</button></div></form>'
   }

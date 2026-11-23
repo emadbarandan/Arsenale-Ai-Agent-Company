@@ -81,6 +81,42 @@ const companyFields = (input, from) => {
   return out
 }
 
+// Spec 1.3 3.1: `taskId` is an alias of `issue`; `issue` wins, with a warning when they differ.
+function aliasTask(input, warnings) {
+  if (input.taskId === undefined || input.taskId === null || input.taskId === '') return input
+  const out = Object.assign({}, input)
+  if (out.issue && String(out.issue) !== String(out.taskId)) warnings.push('WARNING: "taskId" (' + String(out.taskId).slice(0, 40) + ') differs from "issue" (' + String(out.issue).slice(0, 40) + '); "issue" is used')
+  else if (!out.issue) out.issue = out.taskId
+  delete out.taskId
+  return out
+}
+// The meters a finish may report (spec 1.3 3.1), under their CLI and MCP names.
+const METER_NAMES = [['inputTokens', 'input_tokens'], ['outputTokens', 'output_tokens'], ['cacheReadTokens', 'cache_read_tokens'], ['cacheWriteTokens', 'cache_write_tokens'], ['cacheWrite5mTokens', 'cache_write_5m_tokens'], ['cacheWrite1hTokens', 'cache_write_1h_tokens']]
+const LABEL = (v) => /^[a-z0-9-]{1,40}$/.test(v) ? v : ''
+/** The new usage fields, validated. A bad meter is dropped with a warning (never stored as 0). */
+function meterFields(u, input, warnings) {
+  const out = {}
+  for (const [camel, snake] of METER_NAMES) {
+    const v = u[camel] !== undefined ? u[camel] : u[snake]
+    if (v === undefined || v === null) continue
+    if (typeof v === 'number' && Number.isSafeInteger(v) && v >= 0) out[camel] = v
+    else warnings.push('WARNING: usage.' + camel + ' must be a whole number of 0 or more; it was dropped and the run is still logged')
+  }
+  const prov = u.provider !== undefined ? u.provider : input.provider
+  if (prov !== undefined && prov !== null && prov !== '') {
+    if (typeof prov === 'string' && LABEL(prov)) out.provider = prov
+    else warnings.push('WARNING: provider must be 1-40 characters of a-z, 0-9 and "-"; it was dropped')
+  }
+  if (u.estimated === true) out.estimated = true
+  return out
+}
+const strategyOf = (input, warnings) => {
+  if (input.strategy === undefined || input.strategy === null || input.strategy === '') return {}
+  const v = String(input.strategy)
+  if (v.length > 40) { warnings.push('WARNING: strategy is longer than 40 characters; it was dropped'); return {} }
+  return { strategy: v }
+}
+
 // The office a run works for is decided once, here at its start (spec 1.2
 // rule 23), and stamped: a later change of kinds or of a project's office
 // moves no past run and no past budget. The stamp is an explicit officeId to
@@ -200,6 +236,13 @@ function readActive(id) {
  *  flagged, and `warnings` carries the line the CLI prints. */
 function startRun(input, actor) {
   if (!input || !input.agent || !input.task) throw fail(400, 'an entry needs at least "agent" and "task"')
+  const aliasWarnings = []
+  input = aliasTask(input, aliasWarnings)
+  const out = startRun2(input, actor)
+  out.warnings.unshift(...aliasWarnings)
+  return out
+}
+function startRun2(input, actor) {
   if (input.tier !== undefined && !TASK_TIERS.includes(input.tier)) throw fail(400, 'tier must be one of: ' + TASK_TIERS.join(', '))
   fs.mkdirSync(ACTIVE, { recursive: true })
   // the count and the write sit under one lock, so two starts cannot both pass
@@ -235,7 +278,7 @@ function startRunLocked(input, actor) {
     doing: input.doing || '',            // the latest line
     steps: input.doing ? [{ at: input.startedAt || now.toISOString(), text: String(input.doing) }] : [],
     startedAt: input.startedAt || now.toISOString(),
-  }, pidFields(input), pidFields(input).pid ? pidStartFields(pidFields(input).pid) : {}, work, TASK_TIERS.includes(input.tier) ? { tier: input.tier } : {}, companyFields(input), versionFields(input), sourceFields(actor), budget && budget.level !== 'ok' ? { budgetWarned: true, budgetLevel: budget.level } : {}, routeFields(budget))
+  }, pidFields(input), pidFields(input).pid ? pidStartFields(pidFields(input).pid) : {}, work, TASK_TIERS.includes(input.tier) ? { tier: input.tier } : {}, strategyOf(input, warnings), companyFields(input), versionFields(input), sourceFields(actor), budget && budget.level !== 'ok' ? { budgetWarned: true, budgetLevel: budget.level } : {}, routeFields(budget))
   writeAtomic(path.join(ACTIVE, id + '.json'), JSON.stringify(record, null, 2))
   // a job started for a task links to it and moves it from "to do" to "in
   // progress" (never backwards); a missing or unreadable task never stops the log
@@ -343,16 +386,22 @@ function closeDead(id, stillDead) {
 /** Finishes a job: one record file per finished run, never rewritten. */
 function finishRun(input, actor) {
   if (!input || !input.agent || !input.task) throw fail(400, 'an entry needs at least "agent" and "task"')
+  const warnings = []
+  input = aliasTask(input, warnings)
   fs.mkdirSync(ACTIVE, { recursive: true })
   const activeFile = input.id ? activeFileFor(input.id) : ''
   // The final record is written before the active file goes, both under the
   // lock progress takes: a crash in between leaves the run twice (the
   // dashboard shows the finished one), never nowhere.
-  const out = activeFile && fs.existsSync(activeFile) ? withLock(activeFile, () => finishLocked(input, actor, activeFile)) : finishLocked(input, actor, '')
+  const out = activeFile && fs.existsSync(activeFile) ? withLock(activeFile, () => finishLocked(input, actor, activeFile, undefined, warnings)) : finishLocked(input, actor, '', undefined, warnings)
+  out.warnings = warnings
+  // "Pre-existing" findings of a version run become bug proposals for the owner (spec 1.4 section 8)
+  if (out.record.versionRun && out.record.findings.length) { try { require('./proposals.cjs').fromFinish(out.record) } catch { /* proposals are optional */ } }
   if (out.record.issue) { try { require('./tasks.cjs').linkRun(out.record.issue, out.record.id, actor || cliActor({}), { finish: true }) } catch { /* not a task here */ } }
   return out
 }
-function finishLocked(input, actor, activeFile, opts) {
+function finishLocked(input, actor, activeFile, opts, warnings) {
+  warnings = warnings || []
   const now = new Date()
   let startedAt = input.startedAt || ''
   let parent = parentOf(input)
@@ -376,12 +425,8 @@ function finishLocked(input, actor, activeFile, opts) {
     durationMs: Number(input.usage.durationMs) || 0,
     model: String(input.usage.model || ''),
   } : null
-  // reported by an MCP client: split counts, and whether the client guessed them
-  if (usage && actor && actor.door !== 'cli') {
-    if (Number(input.usage.inputTokens) >= 0 && input.usage.inputTokens !== undefined) usage.inputTokens = Number(input.usage.inputTokens) || 0
-    if (Number(input.usage.outputTokens) >= 0 && input.usage.outputTokens !== undefined) usage.outputTokens = Number(input.usage.outputTokens) || 0
-    if (input.usage.estimated === true) usage.estimated = true
-  }
+  // reported by either door: the meters, the provider and whether the tool guessed (spec 1.3 3.1)
+  if (usage) Object.assign(usage, meterFields(input.usage, input, warnings))
   // Counted now, while the transcript is surely there; it may be cleaned up later.
   const transcript = input.id || input.transcript ? B().transcriptFor(String(input.id || ''), startedAt, input.transcript) : null
   const record = {
@@ -404,6 +449,10 @@ function finishLocked(input, actor, activeFile, opts) {
     steps,
   }
   if (usage) record.usage = usage
+  else if (input.provider !== undefined) { const p = meterFields({}, input, warnings); if (p.provider) record.provider = p.provider }
+  Object.assign(record, strategyOf(input, warnings))
+  if (!record.strategy && fromActive && fromActive.strategy) record.strategy = fromActive.strategy
+  { const tier = TASK_TIERS.includes(input.tier) ? input.tier : fromActive && TASK_TIERS.includes(fromActive.tier) ? fromActive.tier : ''; if (tier) record.tier = tier }
   if (transcript) record.transcript = transcript
   Object.assign(record, companyFields(input, fromActive), versionFields(input, fromActive), keptRoute(fromActive))
   if (fromActive && fromActive.budgetWarned) { record.budgetWarned = true; record.budgetLevel = fromActive.budgetLevel || 'warn' }
@@ -598,8 +647,15 @@ function campus(input, actor) { return require('./campus.cjs').apply(input, acto
 /** New office, edit, archive (spec 1.2): the owner only, campus.cjs refuses the rest. */
 function office(input, actor) { return require('./campus.cjs').office(input, actor, actor.door) }
 
+/** A shadow copy of HQ (spec 1.4 section 10.2) is read-only: nothing but the import of the shadow
+ *  itself (the owner, with the importer flag) changes its plan, tasks or queue. */
+function refuseInShadow(actor) {
+  if (actor && actor.role === 'board' && actor.importer === true) return
+  if (fs.existsSync(path.join(P.HOME, 'shadow.json'))) throw fail(409, 'Shadow copy of HQ. HQ is the master; editing is off.')
+}
+
 module.exports = {
-  campus, office, OWNER_ONLY, fail, actorFor, cliActor, boardProven, actorLabel, requireBoard, clipCp,
+  refuseInShadow, campus, office, OWNER_ONLY, fail, actorFor, cliActor, boardProven, actorLabel, requireBoard, clipCp,
   startRun, heavyActive, pidAlive, pidStartMs, progress, touch, closeDead, finishRun, activeFileFor, versionRun, versionLedger, noteIncidents, budgetCheck, readActive,
   gate, decision, answer, dismiss, setBudget, setBudgetsEnabled, updateEmployee,
 }

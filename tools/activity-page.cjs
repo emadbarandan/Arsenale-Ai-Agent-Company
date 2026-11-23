@@ -14,7 +14,7 @@
  */
 
 const ACTIVITY_STYLE = `
-.act{overflow:auto;scrollbar-width:thin;scrollbar-color:#C9D1D9 transparent;flex:1;min-height:0}
+.act{overflow:auto;flex:1;min-height:0}@supports not selector(::-webkit-scrollbar){.act{scrollbar-width:thin;scrollbar-color:#C9D1D9 transparent}}
 .act h3{font:700 11px var(--font-ui);letter-spacing:.8px;text-transform:uppercase;color:var(--ink-dim);margin:14px 0 6px;position:sticky;top:0;background:var(--ground);padding:4px 0;z-index:1}
 .act ol{list-style:none;margin:0;padding:0}
 .act li{display:grid;grid-template-columns:52px 120px 1fr auto;gap:10px;align-items:baseline;padding:6px 8px;border-top:1px solid var(--line);font-size:12.5px;color:var(--ink-soft)}

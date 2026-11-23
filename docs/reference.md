@@ -1,4 +1,4 @@
-# <img src="brand/arsenale-mark.svg" width="36" height="36" alt=""> Arsenale reference
+# <img src="brand/arsenale-logo.svg" height="36" alt="Arsenale"> Arsenale reference
 
 The full manual. The short version is the [README](../README.md).
 
@@ -609,7 +609,7 @@ member's next run goes, and why.
 | `arsenale serve [--port N] [--no-open]` | the dashboard (default port 4310) |
 | `arsenale open [--port N] [--no-open]` | open the running dashboard with your key; `--no-open` only prints the address |
 | `arsenale demo [--port N] [--no-open] [--shop] [--showcase]` | the dashboard on invented data (default port 4311); `--shop`: a small shop with office packs; `--showcase`: for recordings, hides the Waiting for you card, the legends and the help notes (also **?** → Showcase, or `?showcase=1` / `0` on a demo page). `arsenale serve` refuses `--showcase`, and the real app never shows it |
-| `arsenale start / progress / finish / gate / decision --stdin` | log a run, a step, a result, a question, a decision |
+| `arsenale start / progress / finish / gate / decision --stdin` | log a run, a step, a result, a question, a decision. `finish` takes optional `usage` meters (`inputTokens`, `outputTokens`, `cacheReadTokens`, `cacheWriteTokens` or `cacheWrite5mTokens`/`cacheWrite1hTokens`, `provider`, `estimated`), `strategy` and `taskId` (alias of `issue`); `start` takes `tier` and `strategy`. MCP `finish_job.usage` uses the snake-case names (`input_tokens`, `cache_read_tokens`, ...) and `start_job` takes `tier`. A run with all four meters and a priced model shows a cost labelled reported or est.; a bare `usage.tokens` is never priced |
 | `arsenale answers` / `arsenale inbox` | what you answered or changed on the page |
 | `arsenale mcp` | the MCP server on stdin/stdout, for an assistant to start |
 | `arsenale task / comment --stdin` | create or move a task, comment on one |
@@ -620,6 +620,15 @@ member's next run goes, and why.
 | `arsenale resume-scan [--dir <repo>] [--json]` | list runs that ended without finishing and left changes in their worktree (read-only git) |
 | `arsenale alerts [--json]` | stalled and dead runs now (read-only) |
 | `arsenale log --help` | every logging mode, its JSON fields and exit codes |
+| `arsenale ledger [--by run\|task\|version\|office\|model\|week] [--since D] [--until D] [--json]` | finished runs grouped, with tokens, the four meters and cost; a group with an unpriced run shows `≥ $X` and how many are unpriced, none priced shows `n/a`, none measured `not recorded`, never `$0.00`; runs still going are listed apart and not counted; read-only |
+| `arsenale savings [--week 2026-W47] [--json] [--write]` | this week's spend and coverage, cost per done task against a baseline, and tier suggestions (rules R1 to R3, every amount marked `est.`, with the method and the benchmark behind it in `docs/benchmarks/atb-1.md`); `--write` saves `<data>/reports/savings-<week>.md`; the running dashboard also writes last week's report once per ISO week; the page is under More > Savings |
+| `arsenale context [--project <id>] [--write] [--json]` | a short brief of one project (open tasks, open decisions and gates, last runs, house rules) of at most 1,500 tokens; never a brief, transcript text or secret path; `--write` saves `<data>/context/<id>.md`; also `GET /api/context?project=` and MCP `get_context` |
+| `arsenale prices [show\|init\|check] [--force\|--merge]` | show the price file; `init` fills it with the shipped Anthropic list prices (with source and date; refuses if prices exist unless `--force`, or `--merge` for missing models); `check` lists models seen in runs with no price and warns when the prices are over 90 days old |
+| `arsenale plan-check <file> [--expect <expected.json>] [--json]` | check a plan file in schema v1 (JSON) and print progress per phase and overall plus run totals; exit 1 and every problem listed if invalid; `--expect` also exits 1 on any difference from a fixture's expected numbers |
+| `arsenale release-notes <version> --project ID [--write] [--json]` | draft Markdown release notes from the version's done tasks: New (feature), Fixed (bug), Other (chore, untyped), each line "title (NW-12)", plus a count of planned tasks not done; cancelled tasks are left out; starts with "Draft: edit before release."; reads only. `--write` (owner key) saves `<home>/release-notes/<project>/<version>.md` in the data folder, never in a repository |
+| `arsenale plan [show] [--project ID] [--json]` | versions by lane (now, next, later), phases and weighted progress; reads only. With the owner key: `plan version add|edit|move|drop <name> [--title] [--goal] [--horizon] [--status]` and `plan into <task> <version> [--phase ID]`. `GET/POST /api/plan` is the same (POST is the owner only) |
+| `arsenale plan-parity <hq-export.json> --project ID (--phases-as versions \| --version N) [--shadow] [--only-imported] [--json] [--write]` | compares the file with Arsenale (or the shadow): ids, title, status, size, type, phase, target version, decisions, runs, meter sums, cost, `usdStatus`, then totals; prints `Parity: clean` or `Parity: N differences`; exit 0 or 1; `--write` saves `<home>/plan-parity/<project>-<date>.json`. Reads only |
+| `arsenale import-plan <file> … --shadow` / `--promote`, `arsenale plan restore <plan-m3-stamp>`, `arsenale shadow drop --project ID` | M2 and M3 (owner key). `--shadow` writes only `<home>/shadow/<project>/`; `--promote` backs up first (`<home>/backups/plan-m3-<stamp>/` with a SHA-256 manifest), imports, checks parity and undoes itself on a difference; `restore` puts the backup back and verifies the hashes, refusing any path outside the data folder. See `docs/guide/plan-migration.md` |
 | `arsenale paths` | where data, agents and transcripts are read |
 
 Pass JSON with `--stdin` (a quoted heredoc in bash) or `--file`, never inline
@@ -659,6 +668,19 @@ Exit codes: `0` done, `1` failed (bad input, unknown id, port taken), `2`
 `budget-check` said stop or `check-action` said never, `3` `check-action`
 said ask.
 
+## Plan schema v1 and the M1 export contract
+
+`arsenale plan-check` reads one JSON file (a JSON file is also valid YAML; a non-JSON file is refused: "save the plan as JSON"; more than 5 MB is refused).
+
+- `schema_version: 1`; optional `project`; lists `phases`, `tasks`, `decisions`, `runs`.
+- Ids match `[A-Za-z0-9][A-Za-z0-9_.:-]{0,59}` and are unique per list.
+- Phase status `todo|doing|done`; task status `todo|doing|review|blocked|done`; task `type` `feature|bug|chore`, `size` `S|M|L` (weights 1/3/8, default M), `tier` `light|standard|heavy`, `owner` `agent|emad`; a task's `phase` must exist; decision status `open|decided`.
+- 1.3 additions, optional: task `token_estimate` (whole number) and `runs`: `{id, task_id, date, agent, model, tier, strategy, usage {input, output, cache_read, cache_write}, cost, wall_seconds}`. `cost` is a number or `"n/a"`; `0` with no token meters is rejected (unknown is not free). A summed cost with any `"n/a"` run has status `partial`.
+- Unknown fields are allowed and reported. An invalid file is rejected as a whole with every problem listed.
+- Progress is done weight over total weight; no tasks prints "No plan".
+
+**M1 contract (the export script lives in HQ, not in this repository).** It opens HQ's database read-only (SQLite `mode=ro`), writes only the output file, never calls HQ's id-assigning step, and exports items without a plan id as `hq-<kind>-<row id>` with a `source` key. Worklog rows become `runs`: the four token columns to `usage`, `strategy` as is, `cost_usd` above 0 to the number, `cost_usd` 0 to `"n/a"`, `token_est` to `token_estimate`. It is done when, for HQ's invented test project, `arsenale plan-check out.json --expect expected.json` exits 0 against the same expected numbers as `tools/test/fixtures/plan-v1/expected.json`.
+
 ## Configuration
 
 | Setting | Where | Default |
@@ -667,6 +689,7 @@ said ask.
 | Agent folders shown | `agentDirs` in `config.json`, or `ARSENALE_AGENT_DIRS` | `<data>/agents` (the installer sets your tool's folder) |
 | Transcript folders that may be read | `transcriptRoots`, or `ARSENALE_TRANSCRIPT_ROOTS` | none |
 | Heavy-tier model names | `heavyModels` | `["Opus"]` |
+| First day of the savings baseline (14 days) | `savingsBaseline`: `"2026-11-01"` | the first 14 days with measured runs |
 | Run log, company and built pages kept in another folder (an existing setup) | `runsDir`, `companyDir`, `pagesDir` | `<data>/agent-runs`, `<data>/company`, `<data>` |
 | Project names that mean one project | `projectAliases`: `[{"match": "<regex>", "project": "<name>"}]` | none |
 | The version a bare model family meant in older records | `modelAliases`: `{"Opus": "Opus 5.5"}` | none |
@@ -746,7 +769,7 @@ back from the backup), the launchers and the PATH entry. Your run logs stay in
 
 ## Status
 
-Version 1.2.2. There is no desktop app yet: Arsenale runs as `arsenale serve`
+Version 1.4.0. There is no desktop app yet: Arsenale runs as `arsenale serve`
 in your browser, so the installer still needs Node.js. Tested on Windows 11
 with Node.js 24; the CI runs the test
 suite on Windows, macOS and Ubuntu with Node.js 22 and 24. The transcript

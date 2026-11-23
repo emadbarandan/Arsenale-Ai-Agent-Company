@@ -1,0 +1,84 @@
+{
+  "schema_version": 1,
+  "project": "demo-bakery",
+  "phases": [
+    {
+      "id": "P1",
+      "title": "Storefront",
+      "goal": "Menu and ordering page",
+      "status": "doing"
+    },
+    {
+      "id": "P2",
+      "title": "Delivery",
+      "goal": "Routes and tracking",
+      "status": "todo"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "B-01",
+      "title": "Menu page (new look)",
+      "phase": "P1",
+      "status": "done",
+      "type": "feature",
+      "size": "M",
+      "tier": "standard",
+      "owner": "agent",
+      "token_estimate": 40000
+    },
+    {
+      "id": "B-02",
+      "title": "Order form",
+      "phase": "P1",
+      "status": "done",
+      "type": "feature",
+      "size": "L",
+      "tier": "heavy",
+      "owner": "agent"
+    },
+    {
+      "id": "B-03",
+      "title": "Fix price rounding",
+      "phase": "P1",
+      "status": "done",
+      "type": "bug",
+      "size": "S",
+      "tier": "light",
+      "owner": "agent",
+      "updated_at": "2000-01-01T00:00:00Z"
+    },
+    {
+      "id": "B-04",
+      "title": "Opening-hours copy",
+      "phase": "P1",
+      "status": "doing",
+      "type": "chore",
+      "size": "S",
+      "tier": "light",
+      "owner": "owner",
+      "mood": "calm"
+    },
+    {
+      "id": "B-05",
+      "title": "Route planner",
+      "phase": "P2",
+      "status": "todo",
+      "type": "feature",
+      "size": "L",
+      "tier": "heavy",
+      "owner": "agent",
+      "updated_at": "2099-01-01T00:00:00Z"
+    },
+    {
+      "id": "B-06",
+      "title": "Tracking link v2",
+      "phase": "P2",
+      "status": "todo",
+      "type": "feature",
+      "size": "M",
+      "tier": "standard",
+      "owner": "agent"
+    }
+  ]
+}

@@ -8,7 +8,7 @@ pre.txt,.tt,.cm .cb,.lr .hi{unicode-bidi:plaintext;text-align:start}
 @media (max-width:1120px){.counts li:nth-child(n+2){display:none}.brand-b{display:none}}
 .ev{position:absolute;left:0;right:var(--rw);top:52px;bottom:0;display:flex;overflow:hidden;--line-strong:#CBD3DB;--ink-hi:#111A24;--on-accent:#FFFFFF;--rc:10px}
 .ev[hidden]{display:none}
-.ev-main{flex:1;min-width:0;padding:24px 36px 40px;overflow:auto;scrollbar-width:thin;scrollbar-color:#C9D1D9 transparent;position:relative}
+.ev-main{flex:1;min-width:0;padding:24px 36px 40px;overflow:auto;position:relative}@supports not selector(::-webkit-scrollbar){.ev-main{scrollbar-width:thin;scrollbar-color:#C9D1D9 transparent}}
 .ev-main.room{padding:0;overflow:hidden;background:radial-gradient(ellipse at 50% 40%,#F7F8FA 0,#ECEFF2 70%)}
 .ev-drawer{width:500px;flex:none;border-inline-start:1px solid var(--line-strong);background:var(--panel);box-shadow:-24px 0 40px rgba(30,40,50,.14);display:flex;flex-direction:column;min-height:0}
 .ev-drawer:empty{display:none}
@@ -174,7 +174,7 @@ button.chip{cursor:pointer}
 .ev .tool{inset-inline-end:20px;top:20px;padding:6px;display:flex;gap:6px}
 .ph{display:flex;align-items:center;gap:14px;padding:16px 20px;border-bottom:1px solid var(--line)}
 .ph h2{font-size:19px!important}
-.pb{padding:18px 20px;overflow:auto;flex:1;display:flex;flex-direction:column;gap:16px;scrollbar-width:thin;scrollbar-color:#C9D1D9 transparent}
+.pb{padding:18px 20px;overflow:auto;flex:1;display:flex;flex-direction:column;gap:16px}@supports not selector(::-webkit-scrollbar){.pb{scrollbar-width:thin;scrollbar-color:#C9D1D9 transparent}}
 .pf{padding:14px 20px;border-top:1px solid var(--line);display:flex;gap:10px;background:var(--panel-raised);align-items:center;flex-wrap:wrap}
 .ev .x{margin-inline-start:auto;width:36px;height:36px;border-radius:8px;border:1px solid var(--line-strong);display:grid;place-items:center;color:var(--ink-soft);background:none;cursor:pointer;flex:none}
 .ev .stat{background:var(--panel-raised);border:1px solid var(--line);border-radius:8px;padding:14px 16px;flex:1;min-width:0}
@@ -210,7 +210,7 @@ button.chip{cursor:pointer}
 .wz .guide{position:absolute;inset-inline-start:60px;bottom:40px;display:flex;gap:16px;align-items:flex-end}
 .wz .say{background:var(--panel);border:1px solid var(--line-strong);border-radius:12px 12px 12px 2px;padding:14px 18px;font-size:16px;color:var(--ink-hi);max-width:380px;line-height:1.5}
 .wz .wform{width:600px;max-width:52vw;flex:none;background:var(--panel);border-inline-start:1px solid var(--line-strong);display:flex;flex-direction:column;min-height:0}
-.wz .wpad{padding:30px 32px 16px;overflow:auto;flex:1;display:flex;flex-direction:column;gap:14px;scrollbar-width:thin;scrollbar-color:#C9D1D9 transparent}
+.wz .wpad{padding:30px 32px 16px;overflow:auto;flex:1;display:flex;flex-direction:column;gap:14px}@supports not selector(::-webkit-scrollbar){.wz .wpad{scrollbar-width:thin;scrollbar-color:#C9D1D9 transparent}}
 .wz h1{font-size:28px;color:var(--ink-hi);margin:6px 0 0;line-height:1.2}
 .wz .lead{font-size:15px;color:var(--ink-soft);margin:6px 0 4px;line-height:1.5}
 .wz .wfoot{padding:14px 28px;border-top:1px solid var(--line);display:flex;gap:12px;align-items:center;background:var(--panel-raised);flex:none}

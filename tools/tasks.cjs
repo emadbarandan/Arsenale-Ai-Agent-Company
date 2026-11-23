@@ -96,6 +96,76 @@ function cleanLabels(v) {
   return v.slice(0, 10).map((s) => clipCp(s, 30)).filter(Boolean)
 }
 
+
+// Plan schema v1 task fields (spec 1.3 section 3.4): all optional
+const TYPES = ['feature', 'bug', 'chore']
+const SIZES = ['S', 'M', 'L']
+const TIERS = ['light', 'standard', 'heavy']
+const SCHEMA_FIELDS = ['type', 'size', 'tier', 'targetVersion', 'tokenEstimate', 'acceptance']
+// the supervisor may set these on create only; targetVersion stays the owner's
+// 1.4 (spec 3.2): the owner's too; planId, source and missingInImport belong to import-plan alone
+const PLAN_FIELDS = ['phaseId', 'ownerTask']
+const IMPORT_FIELDS = ['planId', 'source', 'missingInImport']
+const SUPERVISOR_FIELDS = ['type', 'size', 'tier', 'tokenEstimate', 'acceptance']
+
+/** The schema v1 fields present in `input`, checked. A value of null or ''
+ *  means "none" (the field is removed). A bad value is refused, so the caller
+ *  writes nothing. */
+function cleanSchemaFields(input) {
+  const out = {}
+  const enumOf = (k, list, label) => {
+    const v = input[k]
+    if (v === null || v === '') { out[k] = null; return }
+    if (typeof v !== 'string' || !list.includes(v)) throw fail(400, label + ' must be one of ' + list.join(', '))
+    out[k] = v
+  }
+  if (input.type !== undefined) enumOf('type', TYPES, 'Type')
+  if (input.size !== undefined) enumOf('size', SIZES, 'Size')
+  if (input.tier !== undefined) enumOf('tier', TIERS, 'Tier')
+  if (input.targetVersion !== undefined) {
+    const v = input.targetVersion
+    if (v === null || v === '') out.targetVersion = null
+    else if (typeof v !== 'string' || !/^[0-9A-Za-z.+-]{1,20}$/.test(v)) throw fail(400, 'Target version is 1 to 20 characters: letters, digits, dot, plus or dash, for example 1.3.1')
+    else out.targetVersion = v
+  }
+  if (input.tokenEstimate !== undefined) {
+    const v = input.tokenEstimate
+    if (v === null || v === '') out.tokenEstimate = null
+    else {
+      const n = typeof v === 'string' && /^\d+$/.test(v.trim()) ? Number(v) : v
+      if (typeof n !== 'number' || !Number.isSafeInteger(n) || n < 0) throw fail(400, 'Token estimate must be a whole number, 0 or more')
+      out.tokenEstimate = n
+    }
+  }
+  if (input.phaseId !== undefined) {
+    const v = input.phaseId
+    if (v === null || v === '') out.phaseId = null
+    else if (typeof v !== 'string' || !/^[A-Za-z0-9][A-Za-z0-9_.:-]{0,59}$/.test(v)) throw fail(400, 'Phase id is 1 to 60 characters: letters, digits, dot, colon, underscore or dash')
+    else out.phaseId = v
+  }
+  if (input.ownerTask !== undefined) {
+    if (input.ownerTask === null || input.ownerTask === '' || input.ownerTask === false) out.ownerTask = null
+    else if (input.ownerTask === true) out.ownerTask = true
+    else throw fail(400, 'ownerTask is true or empty')
+  }
+  if (input.acceptance !== undefined) {
+    const v = input.acceptance
+    if (v === null || v === '') out.acceptance = null
+    else if (typeof v !== 'string' || Array.from(v).length > 2000) throw fail(400, 'Acceptance is text of at most 2000 characters')
+    else out.acceptance = v
+  }
+  return out
+}
+
+/** A phase id must be one the plan file lists for that version; a version no
+ *  file lists (unlisted) has no phases, so a phase cannot be set there. */
+function checkPhase(projectId, version, phaseId) {
+  let plan
+  try { plan = require('./plan.cjs').readPlan(String(projectId || '_')) } catch { plan = { versions: [] } }
+  const v = plan.versions.find((x) => x.name === version)
+  if (!v || !v.phases.some((p) => p.id === phaseId)) throw fail(400, 'No phase ' + clipCp(phaseId, 20) + ' in version ' + clipCp(version, 20))
+}
+
 /** The prefix for a new task: the project's key, else the company's. */
 function prefixFor(co, projectId) {
   const p = projectId && co.projects.find((x) => x.id === projectId)
@@ -154,6 +224,7 @@ function assigneeOf(co, input, out) {
 /** Creates a task. The board through the dashboard; the assistant through
  *  MCP or the CLI (createdBy says which). */
 function createTask(input, actor) {
+  require('./runlog.cjs').refuseInShadow(actor)
   const C = company()
   const co = C.readCompany()
   if (!co.configured) throw fail(409, 'Set up your company first: tasks belong to a company')
@@ -163,6 +234,12 @@ function createTask(input, actor) {
   if (!title) throw fail(400, 'A task needs a title (1 to 200 characters)')
   if (Array.from(String(input.description || '')).length > 8000) throw fail(400, 'The details are at most 8000 characters')
   const isBoard = actor.role === 'board'
+  for (const k of SCHEMA_FIELDS.concat(PLAN_FIELDS)) {
+    if (input[k] !== undefined && !isBoard && !SUPERVISOR_FIELDS.includes(k)) throw fail(403, 'Only the owner can set ' + k + '. ' + OWNER_ONLY)
+  }
+  const schema = cleanSchemaFields(input)
+  if (schema.phaseId && !schema.targetVersion) throw fail(400, 'A phase belongs to a version: set the target version too')
+  if (schema.phaseId) checkPhase(input.projectId, schema.targetVersion, schema.phaseId)
   if (!isBoard) {
     const today = new Date().toISOString().slice(0, 10)
     let made = 0
@@ -189,6 +266,8 @@ function createTask(input, actor) {
     t.parentId = parent.id
   }
   assigneeOf(co, input, t)
+  for (const [k, v] of Object.entries(schema)) if (v !== null) t[k] = v
+  if (isBoard && actor.importer === true) for (const k of IMPORT_FIELDS) if (input[k] !== undefined && input[k] !== null && input[k] !== false) t[k] = k === 'missingInImport' ? true : clipCp(input[k], k === 'planId' ? 60 : 120)
   if (input.kind !== undefined) {
     t.kind = kindOf(input)
     // a task with a kind and no office goes where a run of that kind would
@@ -206,7 +285,7 @@ function createTask(input, actor) {
   })
   const summary = id + ' created: ' + title
   C.activity({ actor: actorLabel(actor), action: 'task.created', entityType: 'task', entityId: id, summary, via: actor.door })
-  if (isBoard) C.inboxLine({ type: 'task.created', id, summary: 'New task ' + id + ': ' + title }, actor.door)
+  if (isBoard && actor.importer !== true) C.inboxLine({ type: 'task.created', id, summary: 'New task ' + id + ': ' + title }, actor.door)
   return t
 }
 
@@ -218,12 +297,13 @@ function updateTask(input, actor) {
   return lockTask(input && input.id, () => updateTaskLocked(input, actor))
 }
 function updateTaskLocked(input, actor) {
+  require('./runlog.cjs').refuseInShadow(actor)
   const C = company()
   const co = C.readCompany()
   if (!co.configured) throw fail(409, 'Set up your company first: tasks belong to a company')
   if (co.readOnly) throw fail(409, 'Company data was written by a newer dashboard (v' + co.company.schemaVersion + '). Editing is disabled.')
   const t = needTask(input.id)
-  const by = actorLabel(actor)
+  const by = actor.importer === true ? 'import' : actorLabel(actor)
   const isBoard = actor.role === 'board'
   if (actor.role === 'agent') throw fail(403, 'agents may only comment on their own task')
   const changed = []
@@ -258,8 +338,25 @@ function updateTaskLocked(input, actor) {
     if (input.priority !== undefined) { if (!PRIORITIES.includes(String(input.priority))) throw fail(400, 'priority must be one of ' + PRIORITIES.join(', ')); set('priority', String(input.priority)) }
     if (input.needsSignOff !== undefined) set('needsSignOff', input.needsSignOff === true)
     if (input.kind !== undefined) set('kind', kindOf(input))
+    const clean = cleanSchemaFields(input)
+    // a phase belongs to one version: changing the version clears it (spec 3.2)
+    if (clean.targetVersion !== undefined && (clean.targetVersion || undefined) !== t.targetVersion && clean.phaseId === undefined && t.phaseId !== undefined) clean.phaseId = null
+    const nextVersion = clean.targetVersion !== undefined ? clean.targetVersion : t.targetVersion
+    if (clean.phaseId) {
+      if (!nextVersion) throw fail(400, 'A phase belongs to a version: set the target version too')
+      checkPhase(t.projectId, nextVersion, clean.phaseId)
+    }
+    if (actor.importer === true) for (const k of IMPORT_FIELDS) if (input[k] !== undefined) { if (input[k] === null || input[k] === false || input[k] === '') { if (t[k] !== undefined) { pushHistory(t, by, k, t[k], ''); delete t[k]; changed.push(k) } } else set(k, k === 'missingInImport' ? true : clipCp(input[k], k === 'planId' ? 60 : 120)) }
+    for (const [k, v] of Object.entries(clean)) {
+      if (v === null) {
+        if (t[k] === undefined) continue
+        pushHistory(t, by, k, t[k], '')
+        delete t[k]
+        changed.push(k)
+      } else set(k, v)
+    }
   } else {
-    for (const k of ['title', 'description', 'dueDate', 'links', 'labels', 'priority', 'needsSignOff', 'kind']) {
+    for (const k of ['title', 'description', 'dueDate', 'links', 'labels', 'priority', 'needsSignOff', 'kind'].concat(SCHEMA_FIELDS, PLAN_FIELDS, IMPORT_FIELDS)) {
       if (input[k] !== undefined) throw fail(403, 'Only the owner can change ' + k + '. ' + OWNER_ONLY)
     }
   }
@@ -271,7 +368,7 @@ function updateTaskLocked(input, actor) {
   writeAtomic(fileOf(t.id), JSON.stringify(t, null, 2))
   const summary = t.id + ': ' + changed.map((k) => k + '=' + (typeof t[k] === 'object' ? JSON.stringify(t[k]).slice(0, 40) : String(t[k]).slice(0, 40))).join(', ')
   C.activity({ actor: by, action: 'task.updated', entityType: 'task', entityId: t.id, summary, via: actor.door })
-  if (isBoard) C.inboxLine({ type: 'task.updated', id: t.id, summary }, actor.door)
+  if (isBoard && actor.importer !== true) C.inboxLine({ type: 'task.updated', id: t.id, summary }, actor.door)
   return { task: t, changed }
 }
 
@@ -329,8 +426,9 @@ function summaryOf(t) {
   return {
     id: t.id, title: t.title, status: t.status, priority: t.priority, projectId: t.projectId,
     assigneeAgentId: t.assigneeAgentId, assigneeUserId: t.assigneeUserId, assigneeOfficeId: t.assigneeOfficeId || '', kind: t.kind || '',
+    phaseId: t.phaseId || '', ownerTask: t.ownerTask === true, type: t.type || '', size: t.size || '', tier: t.tier || '', targetVersion: t.targetVersion || '', tokenEstimate: t.tokenEstimate === undefined ? null : t.tokenEstimate, acceptance: t.acceptance || '',
     dueDate: t.dueDate || '', needsSignOff: !!t.needsSignOff, createdBy: t.createdBy, updatedAt: t.updatedAt, createdAt: t.createdAt, completedAt: t.completedAt || '',
-    comments, seenAt: seen, runs: (t.runIds || []).length,
+    comments, seenAt: seen, runs: (t.runIds || []).length, missingInImport: t.missingInImport === true,
   }
 }
 
@@ -375,6 +473,6 @@ function linkRunLocked(taskId, runId, actor, opts) {
 }
 
 module.exports = {
-  ISSUES, COMMENTS, STATUSES, MCP_STATUS, TASK_ID, LINK_BAD,
+  ISSUES, COMMENTS, STATUSES, TYPES, SIZES, TIERS, SCHEMA_FIELDS, PLAN_FIELDS, IMPORT_FIELDS, MCP_STATUS, TASK_ID, LINK_BAD,
   createTask, updateTask, addComment, readComments, listTasks, getTask, readTask, markSeen, linkRun, cleanDate, cleanLinks, lockFilesOf,
 }

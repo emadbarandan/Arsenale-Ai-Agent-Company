@@ -1,0 +1,167 @@
+{
+  "schema_version": 1,
+  "project": "demo-bakery",
+  "phases": [
+    {
+      "id": "P1",
+      "title": "Storefront",
+      "goal": "Menu and ordering page",
+      "status": "doing"
+    },
+    {
+      "id": "P2",
+      "title": "Delivery",
+      "goal": "Routes and tracking",
+      "status": "todo"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "B-01",
+      "title": "Menu page",
+      "phase": "P1",
+      "status": "finished",
+      "type": "feature",
+      "size": "M",
+      "tier": "standard",
+      "owner": "agent",
+      "token_estimate": 40000
+    },
+    {
+      "id": "B-02",
+      "title": "Order form",
+      "phase": "P1",
+      "status": "done",
+      "type": "feature",
+      "size": "L",
+      "tier": "heavy",
+      "owner": "agent"
+    },
+    {
+      "id": "B-03",
+      "title": "Fix price rounding",
+      "phase": "P1",
+      "status": "review",
+      "type": "bug",
+      "size": "S",
+      "tier": "light",
+      "owner": "agent"
+    },
+    {
+      "id": "B-04",
+      "title": "Opening-hours copy",
+      "phase": "P1",
+      "status": "doing",
+      "type": "chore",
+      "size": "S",
+      "tier": "light",
+      "owner": "owner",
+      "mood": "calm"
+    },
+    {
+      "id": "B-05",
+      "title": "Route planner",
+      "phase": "P2",
+      "status": "blocked",
+      "type": "feature",
+      "size": "L",
+      "tier": "heavy",
+      "owner": "agent"
+    },
+    {
+      "id": "B-06",
+      "title": "Tracking link",
+      "phase": "P2",
+      "status": "todo",
+      "type": "feature",
+      "size": "M",
+      "tier": "standard",
+      "owner": "agent"
+    },
+    {
+      "id": "B-07",
+      "title": "Driver notes",
+      "phase": "P2",
+      "status": "todo",
+      "type": "chore",
+      "size": "S",
+      "tier": "light",
+      "owner": "owner"
+    }
+  ],
+  "decisions": [
+    {
+      "id": "D1",
+      "question": "Which database?",
+      "options": [
+        "sqlite",
+        "postgres"
+      ],
+      "recommendation": "sqlite",
+      "status": "decided",
+      "answer": "sqlite"
+    },
+    {
+      "id": "D2",
+      "question": "Pay online?",
+      "options": [
+        "yes",
+        "no"
+      ],
+      "status": "open"
+    }
+  ],
+  "runs": [
+    {
+      "id": "R1",
+      "task_id": "B-01",
+      "date": "2026-01-05",
+      "agent": "builder",
+      "model": "model-a",
+      "tier": "standard",
+      "strategy": "plain",
+      "usage": {
+        "input": 1000,
+        "output": 500,
+        "cache_read": 2000,
+        "cache_write": 100
+      },
+      "cost": 0.25,
+      "wall_seconds": 120
+    },
+    {
+      "id": "R2",
+      "task_id": "B-02",
+      "date": "2026-01-06",
+      "agent": "builder",
+      "model": "model-b",
+      "tier": "heavy",
+      "strategy": "plan-first",
+      "usage": {
+        "input": 3000,
+        "output": 1500,
+        "cache_read": 0,
+        "cache_write": 0
+      },
+      "cost": 1.5,
+      "wall_seconds": 300
+    },
+    {
+      "id": "R3",
+      "task_id": "B-03",
+      "date": "2026-01-07",
+      "agent": "helper",
+      "model": "model-a",
+      "tier": "light",
+      "strategy": "plain",
+      "usage": {
+        "input": 500,
+        "output": 250,
+        "cache_read": 0,
+        "cache_write": 0
+      },
+      "cost": "n/a",
+      "wall_seconds": 45
+    }
+  ]
+}

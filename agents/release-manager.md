@@ -16,7 +16,9 @@ Follow `AGENT-RULES.md` (in the same folder as this file) and the repo's `PROJEC
 **Read first**
 From PROJECT.md: the version files, the release-notes path, the About "new"
 list, the update feed and its fields, the installer output, and the git policy
-(main branch, working branch, what is allowed). Then run these, all read-only:
+(main branch, working branch, what is allowed). If the owner saved a release-notes draft, read it
+first: `<home>/release-notes/<project>/<version>.md` (written by `arsenale release-notes <version> --write`;
+the owner edits it, you do not rewrite it). Then run these, all read-only:
 - `git log --oneline <last tag>..HEAD`
 - `git tag -l --sort=-creatordate`
 - `git status --short`
