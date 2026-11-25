@@ -60,6 +60,23 @@ folder or a `.zip` someone gave you.
 
 ![Org chart](docs/media/org-chart.png)
 
+## Spend fewer tokens
+
+Arsenale counts what every run costs (input, output, cache read and cache
+write) and its Savings page tells you where the same work could cost less.
+The suggestions come from a small benchmark we ran on ten everyday tasks
+(ATB-1 lite, one run per task, list prices of 18 November 2026):
+
+| | Saved | How |
+|---|---|---|
+| **Cost per passed task** | **-31 %** | each task on the right model tier, a short code map, a few working rules |
+| **A chain of three unrelated tasks** | **-52 %** | a fresh start with the code map for each step |
+| **A status scan** | **-95 %** | the light model, with the same 13 of 13 facts |
+
+Writing and research stay on the strong model: the cheap run lost quality
+there, so Arsenale never suggests it. Every suggestion is marked "est." and
+names its method. [How we measured](docs/benchmarks/atb-1.md).
+
 ## Install
 
 You need [Node.js](https://nodejs.org) 22 or newer and git.
@@ -103,7 +120,7 @@ To remove it: `install.ps1 -Uninstall` or `./install.sh --uninstall`.
 Open **Settings, Assistants** on the dashboard. Each tool has a card with the
 exact command and a Test button. The adapters are in [adapters/](adapters/).
 
-## What is new in 1.4 and 1.3 (not released yet)
+## What is new in 1.4 and 1.3
 
 1.4 "Plan":
 - **A Plan screen.** A roadmap per project with versions, phases, tasks,
